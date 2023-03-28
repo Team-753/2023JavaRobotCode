@@ -13,6 +13,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.AnalogEncoder;
+import frc.robot.configs.SwerveModuleConfig;
 
 public class SwerveModule {
 
@@ -24,18 +25,19 @@ public class SwerveModule {
     private final Rotation2d xAngle;
 
     private static double drivingGearRatio = 8.14;
-    private static double turningGearRatio = 8.14;
-    private static double wheelDiameter = 8.14;
+    private static double turningGearRatio = 12.8;
+    private static double wheelDiameter = 0.1016;
 
 
-    public SwerveModule(String name, int driveID, int turnID, double offset, int absoluteID, Rotation2d XAngle)
+    public SwerveModule(SwerveModuleConfig swerveModuleConfig)
     {
-        moduleName = name;
-        driveMotor = new TalonFX(driveID);
-        turnMotor = new TalonFX(turnID);
-        analogEncoder = new AnalogEncoder(absoluteID);
-        absoluteOffset = offset;
-        xAngle = XAngle;
+
+        moduleName = swerveModuleConfig.name;
+        driveMotor = new TalonFX(swerveModuleConfig.driveMotorID);
+        turnMotor = new TalonFX(swerveModuleConfig.turnMotorID);
+        analogEncoder = new AnalogEncoder(swerveModuleConfig.analogID);
+        absoluteOffset = swerveModuleConfig.analogOffset;
+        xAngle = swerveModuleConfig.xAngle;
 
         TalonFXConfiguration turnMotorConfig = new TalonFXConfiguration();
         turnMotorConfig.absoluteSensorRange = AbsoluteSensorRange.Unsigned_0_to_360;
@@ -78,7 +80,7 @@ public class SwerveModule {
         return Rotation2d.fromDegrees(((turnMotor.getSelectedSensorPosition() % (2048 * turningGearRatio)) * 360) / (2048 * turningGearRatio));
     }
 
-    public void SetState(SwerveModuleState state) {
+    public void setState(SwerveModuleState state) {
         SwerveModuleState desiredState = SwerveModuleState.optimize(state, getIntegratedState());
         double velocity = desiredState.speedMetersPerSecond * drivingGearRatio * 2048 / (wheelDiameter * Math.PI * 10); // converting from m/s to ticks / 100ms
         if (velocity == 0.0) {
@@ -109,7 +111,7 @@ public class SwerveModule {
 
     public void XMode() {
         driveMotor.setNeutralMode(NeutralMode.Coast);
-        SetState(new SwerveModuleState(0.0, xAngle));
+        setState(new SwerveModuleState(0.0, xAngle));
     }
 
     private void Stop() {
@@ -121,5 +123,11 @@ public class SwerveModule {
         double distanceMeters = -driveMotor.getSelectedSensorPosition() * wheelDiameter * Math.PI / (2048 * drivingGearRatio);
         Rotation2d angle = getIntegratedState();
         return new SwerveModulePosition(distanceMeters, angle);
+    }
+
+    public SwerveModuleState getSwerveModuleState() {
+        double velocity = (-driveMotor.getSelectedSensorVelocity() * 10 * wheelDiameter * Math.PI) / (2048 * drivingGearRatio);
+        Rotation2d angle = getIntegratedState();
+        return new SwerveModuleState(velocity, angle);
     }
 }
