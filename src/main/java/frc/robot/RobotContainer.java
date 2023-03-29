@@ -68,19 +68,20 @@ public class RobotContainer {
     // we need this for on the fly generation w/ no eventmap and no alliance color 
     bareBonesAutoBuilder = new SwerveAutoBuilder(driveTrain::getEstimatedPose, driveTrain::resetPose, new PIDConstants(Config.AutonomousConstants.translationKP, Config.AutonomousConstants.translationKI, Config.AutonomousConstants.translationKD), new PIDConstants(Config.AutonomousConstants.rotationKP, Config.AutonomousConstants.rotationKI, Config.AutonomousConstants.rotationKD), driveTrain::PPDrive, null, false, driveTrain);
     generateEventMap();
-    swerveAutoBuilder = new SwerveAutoBuilder(driveTrain::getEstimatedPose, driveTrain::resetPose, new PIDConstants(Config.AutonomousConstants.translationKP, Config.AutonomousConstants.translationKI, Config.AutonomousConstants.translationKD), new PIDConstants(Config.AutonomousConstants.rotationKP, Config.AutonomousConstants.rotationKI, Config.AutonomousConstants.rotationKD), driveTrain::PPDrive, eventMap, true, driveTrain);
+    swerveAutoBuilder = new SwerveAutoBuilder(driveTrain::getEstimatedPose, driveTrain::dummyResetPose, new PIDConstants(Config.AutonomousConstants.translationKP, Config.AutonomousConstants.translationKI, Config.AutonomousConstants.translationKD), new PIDConstants(Config.AutonomousConstants.rotationKP, Config.AutonomousConstants.rotationKI, Config.AutonomousConstants.rotationKD), driveTrain::PPDrive, eventMap, true, driveTrain);
     configureBindings();
 
     // setting our autos
     autoChooser.setDefaultOption("Place Cube", "Place Cube");
     autoChooser.addOption("Charge", "Charge");
     // Grabbing the auto path names as to automatically populate our dashboard
-    File f = new File(System.getProperty("user.dir") + "\\src\\main\\deploy\\pathplanner");
-    pathnames = f.list();
-    for (int i = 0; i < pathnames.length; i++) {
-      pathnames[i] = pathnames[i].replace(".path", "");
-      autoChooser.addOption(pathnames[i], pathnames[i]);
-    }
+    // File f = new File(System.getProperty("user.dir") + "/src/main/deploy/pathplanner");
+    // pathnames = f.list();
+    // for (int i = 0; i < pathnames.length; i++) {
+    //   pathnames[i] = pathnames[i].replace(".path", "");
+    //   autoChooser.addOption(pathnames[i], pathnames[i]);
+    // }
+    autoChooser.addOption("Testing", "Testing");
     SmartDashboard.putData("Autonomous Chooser", autoChooser);
   }
 
@@ -139,7 +140,7 @@ public class RobotContainer {
   }
 
   public void disabledPeriodic() {
-    if (DriverStation.getAlliance() == DriverStation.Alliance.Red) {
+    if (DriverStation.getAlliance().equals(DriverStation.Alliance.Red)) {
       driveTrain.setRedAlliance(true);
     }
     else {

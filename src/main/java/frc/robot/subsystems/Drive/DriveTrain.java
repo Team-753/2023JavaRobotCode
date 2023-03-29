@@ -30,8 +30,8 @@ public class DriveTrain extends SubsystemBase {
     private SwerveModule rearRightModule;
     private SwerveDriveKinematics kinematics;
     private SwerveDrivePoseEstimator poseEstimator;
-    private static final Vector<N3> stateStdDevs = VecBuilder.fill(0.1, 0.1, 0.1);
-    private static final Vector<N3> visionMeasurementStdDevs = VecBuilder.fill(1.5, 1.5, 1.5);
+    private static final Vector<N3> stateStdDevs = VecBuilder.fill(2, 2, 2);
+    private static final Vector<N3> visionMeasurementStdDevs = VecBuilder.fill(0.5, 0.5, 0.5);
     private double speedLimitingFactor = 1;
     public Command enableSpeedLimiterCommand;
     public Command disableSpeedLimiterCommand;
@@ -208,6 +208,7 @@ public class DriveTrain extends SubsystemBase {
     public void resetPose(Pose2d poseToSet) {
         poseEstimator.resetPosition(navxAHRS.getRotation2d(), getSwerveModulePositions(), poseToSet);
     }
+    public void dummyResetPose(Pose2d nada) {}
 
     public void PPDrive(ChassisSpeeds speeds) {
         if (Math.abs(speeds.vxMetersPerSecond) < Config.AutonomousConstants.lowestVelocity && Math.abs(speeds.vyMetersPerSecond) < Config.AutonomousConstants.lowestVelocity && Math.abs(speeds.omegaRadiansPerSecond) < Config.AutonomousConstants.lowestAngularVelocity) {

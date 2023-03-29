@@ -17,7 +17,7 @@ public class Config {
         }
         public static String limelightName = "limelight";
         public static int pcmID = 61;
-        public static double apriltagThresholdDistance = 1.5;
+        public static double apriltagThresholdDistance = 4;
         public static double fieldHeight = 8.0137;
         public static double fieldLength = 16.54175;
     }
@@ -39,7 +39,7 @@ public class Config {
         public static double translationKP = 5;
         public static double translationKI = 0;
         public static double translationKD = 0;
-        public static double rotationKP = 1;
+        public static double rotationKP = 3;
         public static double rotationKI = 0;
         public static double rotationKD = 0;
         public static boolean usePPServer = true;

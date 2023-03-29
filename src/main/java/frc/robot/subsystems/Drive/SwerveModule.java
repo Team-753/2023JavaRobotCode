@@ -87,7 +87,7 @@ public class SwerveModule {
             driveMotor.set(ControlMode.PercentOutput, 0);
         }
         else {
-            driveMotor.set(TalonFXControlMode.Velocity, velocity);
+            driveMotor.set(TalonFXControlMode.Velocity, -velocity);
         }
         double angleDegrees = desiredState.angle.getDegrees();
         if (angleDegrees < 0) {
@@ -120,13 +120,13 @@ public class SwerveModule {
     }
 
     public SwerveModulePosition getSwerveModulePosition() {
-        double distanceMeters = -driveMotor.getSelectedSensorPosition() * wheelDiameter * Math.PI / (2048 * drivingGearRatio);
+        double distanceMeters = driveMotor.getSelectedSensorPosition() * wheelDiameter * Math.PI / (2048 * drivingGearRatio);
         Rotation2d angle = getIntegratedState();
         return new SwerveModulePosition(distanceMeters, angle);
     }
 
     public SwerveModuleState getSwerveModuleState() {
-        double velocity = (-driveMotor.getSelectedSensorVelocity() * 10 * wheelDiameter * Math.PI) / (2048 * drivingGearRatio);
+        double velocity = (driveMotor.getSelectedSensorVelocity() * 10 * wheelDiameter * Math.PI) / (2048 * drivingGearRatio);
         Rotation2d angle = getIntegratedState();
         return new SwerveModuleState(velocity, angle);
     }
