@@ -10,12 +10,16 @@ public class MandibleOuttakeCommand extends CommandBase {
         Timer timer = new Timer();
         Mandible mandible;
 
-        public MandibleOuttakeCommand(Mandible mandible) {
+        public MandibleOuttakeCommand(Mandible kMandible) {
+            mandible = kMandible;
             timerThreshold = Config.MandibleConstants.defaultOuttakeTime;
+            addRequirements(mandible);
         }
 
-        public MandibleOuttakeCommand(double timeToSpin) {
+        public MandibleOuttakeCommand(Mandible kMandible, double timeToSpin) {
+            mandible = kMandible;
             timerThreshold = timeToSpin;
+            addRequirements(mandible);
         }
 
         @Override

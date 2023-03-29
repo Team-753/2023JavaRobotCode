@@ -3,9 +3,7 @@ package frc.robot.subsystems;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Config;
 
@@ -41,8 +39,14 @@ public class Mandible extends SubsystemBase {
     }
 
     public void passiveIntake() {
-        leftMotor.set(VictorSPXControlMode.PercentOutput, -Config.MandibleConstants.idleSpeed);
-        rightMotor.set(VictorSPXControlMode.PercentOutput, -Config.MandibleConstants.idleSpeed);
+        if (open) {
+            leftMotor.set(VictorSPXControlMode.PercentOutput, -Config.MandibleConstants.idleSpeed);
+            rightMotor.set(VictorSPXControlMode.PercentOutput, -Config.MandibleConstants.idleSpeed);
+        }
+        else {
+            stopWheels();
+        }
+
     }
 
     private void Open() {
@@ -65,10 +69,10 @@ public class Mandible extends SubsystemBase {
         rightMotor.set(VictorSPXControlMode.PercentOutput, Config.MandibleConstants.outtakeSpeed);
     }
 
-    // private void stopWheels() {
-    //     leftMotor.set(VictorSPXControlMode.PercentOutput, 0);
-    //     rightMotor.set(VictorSPXControlMode.PercentOutput, 0);
-    // }
+    private void stopWheels() {
+        leftMotor.set(VictorSPXControlMode.PercentOutput, 0);
+        rightMotor.set(VictorSPXControlMode.PercentOutput, 0);
+    }
 
     public void setOpen(boolean shouldOpen) {
         if (shouldOpen) {

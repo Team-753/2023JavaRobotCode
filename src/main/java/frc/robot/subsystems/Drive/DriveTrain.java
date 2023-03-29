@@ -11,11 +11,12 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import frc.robot.Config;
 import frc.robot.LimelightHelpers;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.VecBuilder;
@@ -31,7 +32,6 @@ public class DriveTrain extends SubsystemBase {
     private SwerveDrivePoseEstimator poseEstimator;
     private static final Vector<N3> stateStdDevs = VecBuilder.fill(0.1, 0.1, 0.1);
     private static final Vector<N3> visionMeasurementStdDevs = VecBuilder.fill(1.5, 1.5, 1.5);
-    private NetworkTable limelightNetworkTable;
     private double speedLimitingFactor = 1;
     public Command enableSpeedLimiterCommand;
     public Command disableSpeedLimiterCommand;
@@ -40,11 +40,11 @@ public class DriveTrain extends SubsystemBase {
     private double deltaTilt = 0;
     private double currentTilt = 0;
     private double tiltTimeStamp = 0;
-    private Timer tiltTimer;
+    private Timer tiltTimer = new Timer();
     private boolean isRedAlliance = false;
+    private Field2d kField2d = new Field2d();
 
-    public DriveTrain(NetworkTable llTable) {
-        limelightNetworkTable = llTable;
+    public DriveTrain() {
         navxAHRS = new AHRS();
         frontLeftModule = new SwerveModule(frc.robot.Config.DimensionalConstants.SwerveModuleConfigurations.get("frontLeftModule"));
         frontRightModule = new SwerveModule(frc.robot.Config.DimensionalConstants.SwerveModuleConfigurations.get("frontRightModule"));
@@ -56,11 +56,12 @@ public class DriveTrain extends SubsystemBase {
             new Translation2d(-frc.robot.Config.DimensionalConstants.trackWidth / 2, frc.robot.Config.DimensionalConstants.wheelBase / 2), // rear left module
             new Translation2d(-frc.robot.Config.DimensionalConstants.trackWidth / 2, -frc.robot.Config.DimensionalConstants.wheelBase / 2) // rear right module
             ); 
-        poseEstimator = new SwerveDrivePoseEstimator(kinematics, navxAHRS.getRotation2d(), getSwerveModulePositions(), null, stateStdDevs, visionMeasurementStdDevs);
+        poseEstimator = new SwerveDrivePoseEstimator(kinematics, navxAHRS.getRotation2d(), getSwerveModulePositions(), new Pose2d(), stateStdDevs, visionMeasurementStdDevs);
         enableSpeedLimiterCommand = runOnce(() -> enableSpeedLimiter());
         disableSpeedLimiterCommand = runOnce(() -> disableSpeedLimiter());
         goXModeCommand = run(() -> goXMode());
         tiltTimer.start();
+        SmartDashboard.putData("Field", kField2d);
     }
 
     private SwerveModulePosition[] getSwerveModulePositions() {
@@ -72,15 +73,15 @@ public class DriveTrain extends SubsystemBase {
     public void periodic() {
         super.periodic();
         poseEstimator.update(navxAHRS.getRotation2d(), getSwerveModulePositions());
-        if (LimelightHelpers.getCurrentPipelineIndex("limelight") == 0 && LimelightHelpers.getTV("limelight")) {
-            Pose3d poseToTag = LimelightHelpers.getCameraPose3d_TargetSpace("limelight");
+        if (LimelightHelpers.getCurrentPipelineIndex(Config.DimensionalConstants.limelightName) == 0 && LimelightHelpers.getTV(Config.DimensionalConstants.limelightName)) {
+            Pose3d poseToTag = LimelightHelpers.getCameraPose3d_TargetSpace(Config.DimensionalConstants.limelightName);
             double distance = poseToTag.toPose2d().getTranslation().getNorm();
             if (distance <= Config.DimensionalConstants.apriltagThresholdDistance) {
                 if (isRedAlliance) {
-                    poseEstimator.addVisionMeasurement(LimelightHelpers.getBotPose2d_wpiRed("limelight"), LimelightHelpers.getLatency_Capture("limelight") + LimelightHelpers.getLatency_Pipeline("limelight"));
+                    poseEstimator.addVisionMeasurement(LimelightHelpers.getBotPose2d_wpiRed(Config.DimensionalConstants.limelightName), LimelightHelpers.getLatency_Capture(Config.DimensionalConstants.limelightName) + LimelightHelpers.getLatency_Pipeline(Config.DimensionalConstants.limelightName));
                 }
                 else {
-                    poseEstimator.addVisionMeasurement(LimelightHelpers.getBotPose2d_wpiBlue("limelight"), LimelightHelpers.getLatency_Capture("limelight") + LimelightHelpers.getLatency_Pipeline("limelight"));
+                    poseEstimator.addVisionMeasurement(LimelightHelpers.getBotPose2d_wpiBlue(Config.DimensionalConstants.limelightName), LimelightHelpers.getLatency_Capture(Config.DimensionalConstants.limelightName) + LimelightHelpers.getLatency_Pipeline(Config.DimensionalConstants.limelightName));
                 }
             }
         }
@@ -98,6 +99,12 @@ public class DriveTrain extends SubsystemBase {
         SmartDashboard.putNumber("Rotation", currentEstimatedPose.getRotation().getDegrees());
         SmartDashboard.putNumber("Tilt", currentTilt);
         SmartDashboard.putNumber("Delta Tilt", deltaTilt);
+        if (isRedAlliance) {
+            kField2d.setRobotPose(new Pose2d(Config.DimensionalConstants.fieldLength - currentEstimatedPose.getX(), Config.DimensionalConstants.fieldHeight - currentEstimatedPose.getY(), currentEstimatedPose.getRotation().rotateBy(Rotation2d.fromDegrees(180))));
+        }
+        else {
+            kField2d.setRobotPose(currentEstimatedPose);
+        }
     }
 
     public double getDeltaTilt() {
@@ -107,6 +114,8 @@ public class DriveTrain extends SubsystemBase {
     public double getTilt() {
         return currentTilt;
     }
+
+
 
     public void setRedAlliance(boolean kIsRedAlliance) {
         if (kIsRedAlliance) {
@@ -126,7 +135,7 @@ public class DriveTrain extends SubsystemBase {
     }
 
     private void enableSpeedLimiter() {
-        speedLimitingFactor = 0.5;
+        speedLimitingFactor = Config.TeleoperatedConstants.toggleableSpeedModifier;
     }
 
     private void disableSpeedLimiter() {
@@ -140,18 +149,51 @@ public class DriveTrain extends SubsystemBase {
         rearRightModule.XMode();
     }
 
-    private void coast() {
+    public void coast() {
         frontLeftModule.Coast();
         frontRightModule.Coast();
         rearLeftModule.Coast();
         rearRightModule.Coast();
     }
 
-    private void stationary() {
+    public void stationary() {
         frontLeftModule.Brake();
         frontRightModule.Brake();
         rearLeftModule.Brake();
         rearRightModule.Brake();
+    }
+
+    public void joystickDrive(CommandJoystick joystick) {
+        double[] inputs = {joystick.getX(), joystick.getY(), joystick.getZ()};
+        double[] outputs = normalizeInputs(inputs);
+        double xVel = outputs[1] * Config.TeleoperatedConstants.maxVelocity * speedLimitingFactor;
+        double yVel = outputs[0] * Config.TeleoperatedConstants.maxVelocity * speedLimitingFactor;
+        double zVel = outputs[2] * Config.TeleoperatedConstants.maxAngularVelocity * Config.TeleoperatedConstants.turningSpeedModifier;
+        if (xVel == 0 && yVel == 0 && zVel == 0) {
+            stationary();
+        }
+        else {
+            setSwerveStates(xVel, yVel, zVel);
+        }
+    }
+
+    private double[] normalizeInputs(double[] inputs) {
+        double[] outputs = {0, 0, 0};
+        for (int i = 0; i < 3; i++) {
+            double input = inputs[i];
+            double threshold = Config.TeleoperatedConstants.joystickDeadzones[i];
+            if (Math.abs(input) > threshold) {
+                double adjsutedInput = (Math.abs(input) - threshold) / (1 - threshold);
+                if (input < 0) {
+                    adjsutedInput = -adjsutedInput;
+                }
+                outputs[i] = adjsutedInput;
+            }
+            else {
+                outputs[i] = 0;
+            }
+        }
+        return outputs;
     }
 
     private void setSwerveStates(double xVelocity, double yVelocity, double zVelocity) {
@@ -168,6 +210,10 @@ public class DriveTrain extends SubsystemBase {
     }
 
     public void PPDrive(ChassisSpeeds speeds) {
+        if (Math.abs(speeds.vxMetersPerSecond) < Config.AutonomousConstants.lowestVelocity && Math.abs(speeds.vyMetersPerSecond) < Config.AutonomousConstants.lowestVelocity && Math.abs(speeds.omegaRadiansPerSecond) < Config.AutonomousConstants.lowestAngularVelocity) {
+            stationary();
+        }
+        speeds.omegaRadiansPerSecond = -speeds.omegaRadiansPerSecond; // not sure if this is totally necessary
         SwerveModuleState[] moduleStates = kinematics.toSwerveModuleStates(ChassisSpeeds.fromFieldRelativeSpeeds(speeds, getEstimatedPose().getRotation()));
         SwerveDriveKinematics.desaturateWheelSpeeds(moduleStates, Config.AutonomousConstants.maxVelocity);
         frontLeftModule.setState(moduleStates[0]);

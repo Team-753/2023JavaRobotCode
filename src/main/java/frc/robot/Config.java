@@ -18,23 +18,31 @@ public class Config {
         public static String limelightName = "limelight";
         public static int pcmID = 61;
         public static double apriltagThresholdDistance = 1.5;
+        public static double fieldHeight = 8.0137;
+        public static double fieldLength = 16.54175;
     }
     public static class TeleoperatedConstants {
         public static double maxVelocity = 4.25;
         public static double maxAngularVelocity = maxVelocity / Math.hypot(DimensionalConstants.trackWidth / 2, DimensionalConstants.wheelBase / 2);
         public static double turningSpeedModifier = 0.60;
+        public static double toggleableSpeedModifier = 0.50;
         public static int joystickPort = 0;
         public static int xboxControllerPort = 1;
         public static int streamDeckPort = 2;
+        public static double[] joystickDeadzones = {0.1, 0.1, 0.15};
     }
     public static class AutonomousConstants {
         public static double maxVelocity = 2;
+        public static double maxAccel = 4;
+        public static double lowestVelocity = 0.05;
+        public static double lowestAngularVelocity = 0.1;
         public static double translationKP = 5;
         public static double translationKI = 0;
         public static double translationKD = 0;
         public static double rotationKP = 1;
         public static double rotationKI = 0;
         public static double rotationKD = 0;
+        public static boolean usePPServer = true;
     }
     public static class MandibleConstants {
         public static int forwardChannel = 5;
@@ -47,6 +55,8 @@ public class Config {
         public static double defaultOuttakeTime = 0.50;
     }
     public static class ArmConstants {
+        public static double armIncrement = 0.5;
+        public static double armSlowdownFactor = 0.2;
         public static int falconID = 9;
         public static int limitSwitchID = 0;
         public static double manualControlDeadzone = 0.1;

@@ -32,7 +32,7 @@ public class Arm extends SubsystemBase {
         armFalconConfig.slot0.integralZone = 100;
         armFalconConfig.slot0.allowableClosedloopError = 256;
         SupplyCurrentLimitConfiguration armSupplyCurrentConfig = new SupplyCurrentLimitConfiguration();
-        armSupplyCurrentConfig.currentLimit = 30.0;
+        armSupplyCurrentConfig.currentLimit = 40.0;
         armFalconConfig.supplyCurrLimit = armSupplyCurrentConfig;
         armFalcon.configAllSettings(armFalconConfig, 50);
         armFalcon.setNeutralMode(NeutralMode.Coast);
@@ -41,7 +41,7 @@ public class Arm extends SubsystemBase {
 
     @Override
     public void periodic() {
-        super.periodic();
+        SmartDashboard.putBoolean("Limit Switch", limitSwitch.get());
         if (!zeroed) {
             if (limitSwitch.get()) {
                 armFalcon.set(TalonFXControlMode.PercentOutput, 0);
@@ -66,6 +66,23 @@ public class Arm extends SubsystemBase {
         if (Math.abs(targetValue - (armFalcon.getSelectedSensorPosition() * encoderTicksToDistanceConversionFactor)) < Config.ArmConstants.autoPlacementTolerance) {
             return true;
         }
-        return false;
+        else {
+            return false;
+        }
+    }
+
+    public void manualControl(double scalar, boolean fast) {
+        if (fast) {
+            double newValue = targetValue + scalar * Config.ArmConstants.armIncrement;
+            if (newValue >= 0 && newValue <= maxHeightInches) {
+                targetValue = newValue;
+            }
+            }
+        else {
+            double newValue = targetValue + scalar * Config.ArmConstants.armIncrement * Config.ArmConstants.armSlowdownFactor;
+            if (newValue >= 0 && newValue <= maxHeightInches) {
+                targetValue = newValue;
+            }
+        }
     }
 }
