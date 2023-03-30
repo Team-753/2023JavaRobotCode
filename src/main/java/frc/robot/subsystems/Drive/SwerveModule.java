@@ -95,7 +95,7 @@ public class SwerveModule {
         }
         else {
             velocity = (velocity + staticFrictionFFController.calculate(velocity)) * Config.DriveConstants.drivingGearRatio * 2048 / (Config.DriveConstants.wheelDiameter * Math.PI * 10); // converting from m/s to ticks / 100ms
-            driveMotor.set(TalonFXControlMode.Velocity, -velocity);
+            driveMotor.set(TalonFXControlMode.Velocity, velocity);
         }
         double angleDegrees = desiredState.angle.getDegrees();
         if (angleDegrees < 0) {

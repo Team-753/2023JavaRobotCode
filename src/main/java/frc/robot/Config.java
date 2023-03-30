@@ -10,10 +10,10 @@ public class Config {
         public static double trackWidth = 0.4954524;
         public static HashMap<String, SwerveModuleConfig> SwerveModuleConfigurations = new HashMap<String, SwerveModuleConfig>();
         static {
-            SwerveModuleConfigurations.put("frontLeftModule", new SwerveModuleConfig(1, 2, 0, 76, -135, "frontLeftModule"));
-            SwerveModuleConfigurations.put("frontRightModule", new SwerveModuleConfig(3, 4, 1, 309, 135, "frontRightModule"));
+            SwerveModuleConfigurations.put("frontLeftModule", new SwerveModuleConfig(1, 2, 0, 77.05, -135, "frontLeftModule"));
+            SwerveModuleConfigurations.put("frontRightModule", new SwerveModuleConfig(3, 4, 1, 309.7, 135, "frontRightModule"));
             SwerveModuleConfigurations.put("rearRightModule", new SwerveModuleConfig(5, 6, 2, 227, 45, "rearLeftModule"));
-            SwerveModuleConfigurations.put("rearLeftModule", new SwerveModuleConfig(7, 8, 3, 22.6, -45, "rearRightModule"));
+            SwerveModuleConfigurations.put("rearLeftModule", new SwerveModuleConfig(7, 8, 3, 24.1, -45, "rearRightModule"));
         }
         public static String limelightName = "limelight";
         public static int pcmID = 61;
@@ -22,7 +22,7 @@ public class Config {
         public static double fieldLength = 16.54175;
     }
     public static class TeleoperatedConstants {
-        public static double maxVelocity = 4.25;
+        public static double maxVelocity = 4.00;
         public static double maxAngularVelocity = maxVelocity / Math.hypot(DimensionalConstants.trackWidth / 2, DimensionalConstants.wheelBase / 2);
         public static double turningSpeedModifier = 0.60;
         public static double toggleableSpeedModifier = 0.50;

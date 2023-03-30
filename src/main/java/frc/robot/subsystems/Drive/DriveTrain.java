@@ -213,7 +213,7 @@ public class DriveTrain extends SubsystemBase {
     }
 
     public void joystickDrive(CommandJoystick joystick) {
-        double[] inputs = {joystick.getX(), joystick.getY(), joystick.getZ()};
+        double[] inputs = {-joystick.getX(), -joystick.getY(), -joystick.getZ()};
         double[] outputs = normalizeInputs(inputs);
         double xVel = outputs[1] * Config.TeleoperatedConstants.maxVelocity * speedLimitingFactor;
         double yVel = outputs[0] * Config.TeleoperatedConstants.maxVelocity * speedLimitingFactor;
@@ -276,13 +276,13 @@ public class DriveTrain extends SubsystemBase {
     public void resetPose(Pose2d poseToSet) {
         poseEstimator.resetPosition(navxAHRS.getRotation2d(), getSwerveModulePositions(), poseToSet);
     }
-    public void dummyResetPose(Pose2d nada) {}
+    public void dummyResetPose(Pose2d nada) {} // screw off PP we are not resetting our pose
 
     public void PPDrive(ChassisSpeeds speeds) {
         if (Math.abs(speeds.vxMetersPerSecond) < Config.AutonomousConstants.lowestVelocity && Math.abs(speeds.vyMetersPerSecond) < Config.AutonomousConstants.lowestVelocity && Math.abs(speeds.omegaRadiansPerSecond) < Config.AutonomousConstants.lowestAngularVelocity) {
             stationary();
         }
-        speeds.omegaRadiansPerSecond = -speeds.omegaRadiansPerSecond; // not sure if this is totally necessary
+        //speeds.omegaRadiansPerSecond = -speeds.omegaRadiansPerSecond; // not sure if this is totally necessary
         SwerveModuleState[] moduleStates = kinematics.toSwerveModuleStates(ChassisSpeeds.fromFieldRelativeSpeeds(speeds, getEstimatedPose().getRotation()));
         SwerveDriveKinematics.desaturateWheelSpeeds(moduleStates, Config.AutonomousConstants.maxVelocity);
         frontLeftModule.setState(moduleStates[0]);

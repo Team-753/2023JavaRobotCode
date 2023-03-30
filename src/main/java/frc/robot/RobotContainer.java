@@ -5,7 +5,6 @@
 package frc.robot;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -20,13 +19,15 @@ import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.Drive.DriveTrain;
 import frc.robot.subsystems.Mandible;
+import frc.robot.subsystems.StreamDeck;
 import frc.robot.commands.ArmConfirmPositionCommand;
 import frc.robot.commands.DefaultDriveCommand;
+import frc.robot.commands.DriveInDirectionCommand;
 import frc.robot.commands.MandibleOuttakeCommand;
 import frc.robot.commands.SetArmPositionCommand;
-import frc.robot.commands.TurnToSupplierCommand;
 import frc.robot.commands.AutonomousPickup.DriveUntilOnPieceCommand;
 import frc.robot.commands.AutonomousPickup.LockOnPieceCommand;
+import frc.robot.commands.AutonomousPickup.TurnToPieceCommand;
 import frc.robot.subsystems.Arm;
 
 import java.io.File;
@@ -42,6 +43,7 @@ public class RobotContainer {
   private DriveTrain driveTrain;
   private Mandible mandible;
   private Arm arm;
+  private StreamDeck streamDeck;
   private SwerveAutoBuilder swerveAutoBuilder;
   private SwerveAutoBuilder bareBonesAutoBuilder;
   private HashMap<String, Command> eventMap;
@@ -64,6 +66,7 @@ public class RobotContainer {
     // initialize inputs
     joystick = new CommandJoystick(Config.TeleoperatedConstants.joystickPort);
     xboxController = new CommandXboxController(Config.TeleoperatedConstants.xboxControllerPort);
+    streamDeck = new StreamDeck(arm);
 
 
     // set default command
@@ -73,7 +76,7 @@ public class RobotContainer {
 
     autoPathConstraints = new PathConstraints(Config.AutonomousConstants.maxVelocity, Config.AutonomousConstants.maxAccel);
     // we need this for on the fly generation w/ no eventmap and no alliance color 
-    bareBonesAutoBuilder = new SwerveAutoBuilder(driveTrain::getEstimatedPose, driveTrain::resetPose, new PIDConstants(Config.AutonomousConstants.translationKP, Config.AutonomousConstants.translationKI, Config.AutonomousConstants.translationKD), new PIDConstants(Config.AutonomousConstants.rotationKP, Config.AutonomousConstants.rotationKI, Config.AutonomousConstants.rotationKD), driveTrain::PPDrive, null, false, driveTrain);
+    bareBonesAutoBuilder = new SwerveAutoBuilder(driveTrain::getEstimatedPose, driveTrain::dummyResetPose, new PIDConstants(Config.AutonomousConstants.translationKP, Config.AutonomousConstants.translationKI, Config.AutonomousConstants.translationKD), new PIDConstants(Config.AutonomousConstants.rotationKP, Config.AutonomousConstants.rotationKI, Config.AutonomousConstants.rotationKD), driveTrain::PPDrive, null, false, driveTrain);
     generateEventMap();
     swerveAutoBuilder = new SwerveAutoBuilder(driveTrain::getEstimatedPose, driveTrain::dummyResetPose, new PIDConstants(Config.AutonomousConstants.translationKP, Config.AutonomousConstants.translationKI, Config.AutonomousConstants.translationKD), new PIDConstants(Config.AutonomousConstants.rotationKP, Config.AutonomousConstants.rotationKI, Config.AutonomousConstants.rotationKD), driveTrain::PPDrive, eventMap, true, driveTrain);
     configureBindings();
@@ -82,13 +85,13 @@ public class RobotContainer {
     autoChooser.setDefaultOption("Place Cube", "Place Cube");
     autoChooser.addOption("Charge", "Charge");
     // Grabbing the auto path names as to automatically populate our dashboard
-    // File f = new File(System.getProperty("user.dir") + "/src/main/deploy/pathplanner");
-    // pathnames = f.list();
-    // for (int i = 0; i < pathnames.length; i++) {
-    //   pathnames[i] = pathnames[i].replace(".path", "");
-    //   autoChooser.addOption(pathnames[i], pathnames[i]);
-    // }
-    autoChooser.addOption("Testing", "Testing");
+    File f = new File(System.getProperty("user.dir") + "/src/main/deploy/pathplanner");
+    pathnames = f.list();
+    for (int i = 0; i < pathnames.length; i++) {
+      pathnames[i] = pathnames[i].replace(".path", "");
+      autoChooser.addOption(pathnames[i], pathnames[i]);
+    }
+    //autoChooser.addOption("Testing", "Testing");
     SmartDashboard.putData("Autonomous Chooser", autoChooser);
     
     // DEBUGGING
@@ -114,14 +117,17 @@ public class RobotContainer {
     joystickTwelve.onFalse(driveTrain.disableSpeedLimiterCommand);
 
     Trigger joystickEleven = joystick.button(11);
-    joystickEleven.onTrue(Commands.runOnce(() -> driveTrain.resetPose(new Pose2d()), driveTrain));
+    joystickEleven.whileTrue(Commands.runOnce(() -> driveTrain.resetPose(new Pose2d()), driveTrain));
+
+    Trigger joystickTwo = joystick.button(2);
+    joystickTwo.onTrue(new DriveInDirectionCommand(driveTrain, 2, 0, 0));
 
     xboxController.x().onTrue(Commands.runOnce(() -> mandible.setOpen(false), mandible));
     xboxController.b().onTrue(Commands.runOnce(() -> mandible.setOpen(true), mandible));
     xboxController.a().whileTrue(mandible.toggleIntakeInCommand);
     xboxController.y().whileTrue(mandible.toggleIntakeOutCommand);
-    xboxController.axisGreaterThan(0, Config.ArmConstants.manualControlDeadzone).whileTrue(Commands.run(()-> arm.manualControl(getStickRemainder(xboxController.getLeftY()), xboxController.getHID().getRightBumper()), arm));
-    xboxController.axisLessThan(0, -Config.ArmConstants.manualControlDeadzone).whileTrue(Commands.run(()-> arm.manualControl(getStickRemainder(xboxController.getLeftY()), xboxController.getHID().getRightBumper()), arm));
+    xboxController.axisGreaterThan(1, Config.ArmConstants.manualControlDeadzone).whileTrue(Commands.run(()-> arm.manualControl(getStickRemainder(xboxController.getLeftY()), xboxController.getHID().getRightBumper()), arm));
+    xboxController.axisLessThan(1, -Config.ArmConstants.manualControlDeadzone).whileTrue(Commands.run(()-> arm.manualControl(getStickRemainder(xboxController.getLeftY()), xboxController.getHID().getRightBumper()), arm));
   }
 
   public Command getAutonomousCommand() {
@@ -154,7 +160,7 @@ public class RobotContainer {
     eventMap.put("Close Mandible", Commands.runOnce(() -> mandible.setOpen(false), mandible));
     eventMap.put("Pickup Piece", new SequentialCommandGroup(
       new SetArmPositionCommand(arm, "FloorPickupPrep"), // getting the arm into position
-      new TurnToSupplierCommand(driveTrain, this::getNearestPieceAngle), // turning to the expected angle of the game piece
+      new TurnToPieceCommand(driveTrain), // turning to the expected angle of the game piece
       new LockOnPieceCommand(driveTrain, mandible), // doing the final correction using the limelight google coral pipeline
       new ArmConfirmPositionCommand(arm, "Floor"), // moving the arm into pickup position
       new ParallelRaceGroup(
@@ -171,32 +177,5 @@ public class RobotContainer {
     else {
       driveTrain.setRedAlliance(false);
     }
-  }
-
-  private Rotation2d getNearestPieceAngle() {
-    double[] gamePieceYValues = Config.DriveConstants.AutoPiecePickup.gamePieceYValues;
-    double[] verticalStack = {(gamePieceYValues[0] + gamePieceYValues[1]) / 2, (gamePieceYValues[1] + gamePieceYValues[2]) / 2, (gamePieceYValues[2] + gamePieceYValues[3]) / 2};
-    Pose2d currentPose2d = driveTrain.getEstimatedPose();
-    double currentY = currentPose2d.getY();
-    double targetGamePieceY;
-    if (DriverStation.getAlliance().equals(DriverStation.Alliance.Red)) {
-      currentY = Config.DimensionalConstants.fieldHeight - currentY; // re-orienting it back to blue alliance for the math
-    }
-    if (currentY <= verticalStack[0]) {
-      targetGamePieceY = gamePieceYValues[0]; // bottom game piece
-    }
-    else if (currentY > verticalStack[0] && currentY <= verticalStack[1]) {
-      targetGamePieceY = gamePieceYValues[1]; // 2nd game piece from the bottom
-    }
-    else if (currentY > verticalStack[1] && currentY <= verticalStack[2]) {
-      targetGamePieceY = gamePieceYValues[2]; // 3rd game piece from the bottom
-    }
-    else {
-      targetGamePieceY = gamePieceYValues[3]; // 4th game piece from the bottom
-    }
-    if (DriverStation.getAlliance().equals(DriverStation.Alliance.Red)) {
-      targetGamePieceY = Config.DimensionalConstants.fieldHeight - targetGamePieceY; // re-orienting it back to blue alliance for the math
-    }
-    return new Rotation2d(currentPose2d.getX() - Config.DriveConstants.AutoPiecePickup.gamePieceXValue, currentPose2d.getY() - targetGamePieceY); // the angle computed towards the game piece
   }
 }

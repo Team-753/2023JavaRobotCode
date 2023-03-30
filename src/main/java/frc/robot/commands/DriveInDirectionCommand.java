@@ -32,4 +32,9 @@ public class DriveInDirectionCommand extends CommandBase {
         driveTrain.setChassisSpeeds(xVelocity, yVelocity, zVelocity, fieldOrient);
     }
 
+    @Override
+    public void end(boolean interrupted) {
+        driveTrain.stationary();
+    }
+
 }
