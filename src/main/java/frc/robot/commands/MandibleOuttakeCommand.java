@@ -32,6 +32,7 @@ public class MandibleOuttakeCommand extends CommandBase {
         public void end(boolean interrupted) {
             mandible.passiveIntake();
             timer.stop();
+            timer.reset();
         }
 
         @Override

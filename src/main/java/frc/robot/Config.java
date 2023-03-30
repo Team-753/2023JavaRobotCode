@@ -1,8 +1,12 @@
 package frc.robot;
 
 import java.util.HashMap;
+
+import com.pathplanner.lib.PathConstraints;
+import com.pathplanner.lib.auto.PIDConstants;
+
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
-import frc.robot.configs.SwerveModuleConfig;
+import frc.robot.subsystems.Drive.SwerveModuleConfig;
 
 public class Config {
     public static class DimensionalConstants {
@@ -20,6 +24,41 @@ public class Config {
         public static double apriltagThresholdDistance = 4;
         public static double fieldHeight = 8.0137;
         public static double fieldLength = 16.54175;
+        public static double[][][] gridLayout = {
+            {
+                {0.4191, 4.987417}, 
+                {0.4191, 4.424426}, 
+                {0.4191, 3.861435}, 
+                {0.8509, 4.987417}, 
+                {0.8509, 4.424426}, 
+                {0.8509, 3.861435}, 
+                {1.27635, 4.987417}, 
+                {1.27635, 4.424426}, 
+                {1.27635, 3.861435}
+            }, 
+            {
+                {0.4191, 3.311017}, 
+                {0.4191, 2.748026}, 
+                {0.4191, 2.185035}, 
+                {0.8509, 3.311017}, 
+                {0.8509, 2.748026}, 
+                {0.8509, 2.185035}, 
+                {1.27635, 3.311017}, 
+                {1.27635, 2.748026}, 
+                {1.27635, 2.185035}
+                }, 
+            {
+                {0.4191, 1.634617}, 
+                {0.4191, 1.071626}, 
+                {0.4191, 0.508635}, 
+                {0.8509, 1.634617}, 
+                {0.8509, 1.071626}, 
+                {0.8509, 0.508635}, 
+                {1.27635, 1.634617}, 
+                {1.27635, 1.071626}, 
+                {1.27635, 0.508635}
+            }
+        };
     }
     public static class TeleoperatedConstants {
         public static double maxVelocity = 4.00;
@@ -55,6 +94,14 @@ public class Config {
             public static double gamePieceXValue = 7.11835;
             public static double[] gamePieceYValues = {0.919226, 2.138426, 3.357626, 4.576826};
         }
+        public static class PlacementOffsets {
+            public static double highConeOffset = 1.397;
+            public static double highCubeOffset = 1.7018;
+            public static double midConeOffset = 1.45;
+            public static double midCubeOffset = 1.7018;
+            public static double lowConeOffset = 1.5494;
+            public static double lowCubeOffset = 1.5494;
+        }
     }
     public static class DEBUGGING {
         public static boolean useDebugTab = true;
@@ -74,6 +121,9 @@ public class Config {
         public static double rotationKI = 0;
         public static double rotationKD = 0;
         public static boolean usePPServer = true;
+        public static PathConstraints onTheFlyConstraints = new PathConstraints(maxVelocity, maxAccel);
+        public static PIDConstants translationConstants = new PIDConstants(translationKP, translationKI, translationKD);
+        public static PIDConstants rotationConstants = new PIDConstants(rotationKP, rotationKI, rotationKD);
     }
     public static class MandibleConstants {
         public static int forwardChannel = 5;

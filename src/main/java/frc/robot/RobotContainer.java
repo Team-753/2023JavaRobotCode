@@ -7,8 +7,8 @@ package frc.robot;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+// import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+// import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -28,6 +28,9 @@ import frc.robot.commands.SetArmPositionCommand;
 import frc.robot.commands.AutonomousPickup.DriveUntilOnPieceCommand;
 import frc.robot.commands.AutonomousPickup.LockOnPieceCommand;
 import frc.robot.commands.AutonomousPickup.TurnToPieceCommand;
+import frc.robot.commands.AutonomousPlacement.CalculateArmPositionCommand;
+import frc.robot.commands.AutonomousPlacement.MandiblePlacementCommand;
+import frc.robot.commands.AutonomousPlacement.MoveToPlacementCommand;
 import frc.robot.subsystems.Arm;
 
 import java.io.File;
@@ -51,6 +54,7 @@ public class RobotContainer {
   private CommandXboxController xboxController;
   private String[] pathnames;
   public SendableChooser<String> autoChooser = new SendableChooser<>();
+  SendableChooser<Integer> secondPiecePlacementChooser = new SendableChooser<>();
   private PathConstraints autoPathConstraints;
 
   public RobotContainer() {
@@ -93,6 +97,12 @@ public class RobotContainer {
     }
     //autoChooser.addOption("Testing", "Testing");
     SmartDashboard.putData("Autonomous Chooser", autoChooser);
+
+    secondPiecePlacementChooser.setDefaultOption("High Cone Right", 2);
+    secondPiecePlacementChooser.addOption("High Cone Left", 0);
+    secondPiecePlacementChooser.addOption("High Cube", 1);
+    secondPiecePlacementChooser.addOption("Mid Cube", 4);
+    SmartDashboard.putData("Auto Piece Chooser", secondPiecePlacementChooser);
     
     // DEBUGGING
     // if (Config.DEBUGGING.useDebugTab) {
@@ -168,6 +178,13 @@ public class RobotContainer {
         new DriveUntilOnPieceCommand(driveTrain)), // driving straight forward until we pass over the piece
       mandible.toggleIntakeOffCommand, // stop intaking
       new SetArmPositionCommand(arm, "Optimized"))); // setting the arm back up
+    eventMap.put("Place Piece", new SequentialCommandGroup(
+      new CalculateArmPositionCommand(arm, secondPiecePlacementChooser, false),
+      new MoveToPlacementCommand(driveTrain, bareBonesAutoBuilder, secondPiecePlacementChooser),
+      new CalculateArmPositionCommand(arm, secondPiecePlacementChooser, true),
+      new MandiblePlacementCommand(mandible),
+      new SetArmPositionCommand(arm, "Optimized")
+    ));
   }
 
   public void disabledPeriodic() {

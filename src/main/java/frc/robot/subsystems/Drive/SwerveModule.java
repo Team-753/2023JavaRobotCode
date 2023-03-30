@@ -15,7 +15,6 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.AnalogEncoder;
 import frc.robot.Config;
-import frc.robot.configs.SwerveModuleConfig;
 
 public class SwerveModule {
 
