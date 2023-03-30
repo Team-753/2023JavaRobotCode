@@ -1,6 +1,11 @@
 {
   "HALProvider": {
     "Other Devices": {
+      "AnalogEncoder[0]": {
+        "header": {
+          "open": true
+        }
+      },
       "navX-Sensor[0]": {
         "header": {
           "open": true

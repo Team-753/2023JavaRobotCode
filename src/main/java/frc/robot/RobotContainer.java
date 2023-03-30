@@ -5,12 +5,16 @@
 package frc.robot;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -20,6 +24,9 @@ import frc.robot.commands.ArmConfirmPositionCommand;
 import frc.robot.commands.DefaultDriveCommand;
 import frc.robot.commands.MandibleOuttakeCommand;
 import frc.robot.commands.SetArmPositionCommand;
+import frc.robot.commands.TurnToSupplierCommand;
+import frc.robot.commands.AutonomousPickup.DriveUntilOnPieceCommand;
+import frc.robot.commands.AutonomousPickup.LockOnPieceCommand;
 import frc.robot.subsystems.Arm;
 
 import java.io.File;
@@ -83,6 +90,11 @@ public class RobotContainer {
     // }
     autoChooser.addOption("Testing", "Testing");
     SmartDashboard.putData("Autonomous Chooser", autoChooser);
+    
+    // DEBUGGING
+    // if (Config.DEBUGGING.useDebugTab) {
+    //   ShuffleboardTab debuggingTab = Shuffleboard.getTab("DEBUGGING");
+    // }
   }
 
   private double getStickRemainder(double input) {
@@ -131,12 +143,25 @@ public class RobotContainer {
 
   public void generateEventMap() {
     eventMap = new HashMap<String, Command>();
-    eventMap.put("Place Cube", new SequentialCommandGroup(new ArmConfirmPositionCommand(arm, "HighCube"), new MandibleOuttakeCommand(mandible), new SetArmPositionCommand(arm, "Optimized")));
+    eventMap.put("Place Cube", new SequentialCommandGroup(
+      new ArmConfirmPositionCommand(arm, "HighCube"), 
+      new MandibleOuttakeCommand(mandible), 
+      new SetArmPositionCommand(arm, "Optimized")));
     eventMap.put("Mandible In", mandible.toggleIntakeInCommand);
     eventMap.put("Mandible Out", mandible.toggleIntakeOutCommand);
     eventMap.put("Mandible Off", mandible.toggleIntakeOffCommand);
     eventMap.put("Open Mandible", Commands.runOnce(() -> mandible.setOpen(true), mandible));
     eventMap.put("Close Mandible", Commands.runOnce(() -> mandible.setOpen(false), mandible));
+    eventMap.put("Pickup Piece", new SequentialCommandGroup(
+      new SetArmPositionCommand(arm, "FloorPickupPrep"), // getting the arm into position
+      new TurnToSupplierCommand(driveTrain, this::getNearestPieceAngle), // turning to the expected angle of the game piece
+      new LockOnPieceCommand(driveTrain, mandible), // doing the final correction using the limelight google coral pipeline
+      new ArmConfirmPositionCommand(arm, "Floor"), // moving the arm into pickup position
+      new ParallelRaceGroup(
+        mandible.toggleIntakeInCommand, // spinning the intake in
+        new DriveUntilOnPieceCommand(driveTrain)), // driving straight forward until we pass over the piece
+      mandible.toggleIntakeOffCommand, // stop intaking
+      new SetArmPositionCommand(arm, "Optimized"))); // setting the arm back up
   }
 
   public void disabledPeriodic() {
@@ -146,5 +171,32 @@ public class RobotContainer {
     else {
       driveTrain.setRedAlliance(false);
     }
+  }
+
+  private Rotation2d getNearestPieceAngle() {
+    double[] gamePieceYValues = Config.DriveConstants.AutoPiecePickup.gamePieceYValues;
+    double[] verticalStack = {(gamePieceYValues[0] + gamePieceYValues[1]) / 2, (gamePieceYValues[1] + gamePieceYValues[2]) / 2, (gamePieceYValues[2] + gamePieceYValues[3]) / 2};
+    Pose2d currentPose2d = driveTrain.getEstimatedPose();
+    double currentY = currentPose2d.getY();
+    double targetGamePieceY;
+    if (DriverStation.getAlliance().equals(DriverStation.Alliance.Red)) {
+      currentY = Config.DimensionalConstants.fieldHeight - currentY; // re-orienting it back to blue alliance for the math
+    }
+    if (currentY <= verticalStack[0]) {
+      targetGamePieceY = gamePieceYValues[0]; // bottom game piece
+    }
+    else if (currentY > verticalStack[0] && currentY <= verticalStack[1]) {
+      targetGamePieceY = gamePieceYValues[1]; // 2nd game piece from the bottom
+    }
+    else if (currentY > verticalStack[1] && currentY <= verticalStack[2]) {
+      targetGamePieceY = gamePieceYValues[2]; // 3rd game piece from the bottom
+    }
+    else {
+      targetGamePieceY = gamePieceYValues[3]; // 4th game piece from the bottom
+    }
+    if (DriverStation.getAlliance().equals(DriverStation.Alliance.Red)) {
+      targetGamePieceY = Config.DimensionalConstants.fieldHeight - targetGamePieceY; // re-orienting it back to blue alliance for the math
+    }
+    return new Rotation2d(currentPose2d.getX() - Config.DriveConstants.AutoPiecePickup.gamePieceXValue, currentPose2d.getY() - targetGamePieceY); // the angle computed towards the game piece
   }
 }

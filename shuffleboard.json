@@ -11,7 +11,38 @@
         "vgap": 16.0,
         "titleType": 0,
         "tiles": {
-          "1,0": {
+          "0,0": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Boolean Box",
+              "_source0": "network_table:///SmartDashboard/isRedAlliance",
+              "_title": "isRedAlliance",
+              "_glyph": 148,
+              "_showGlyph": false,
+              "Colors/Color when true": "#7CFC00FF",
+              "Colors/Color when false": "#8B0000FF"
+            }
+          },
+          "5,1": {
+            "size": [
+              6,
+              3
+            ],
+            "content": {
+              "_type": "Field",
+              "_source0": "network_table:///SmartDashboard/Field",
+              "_title": "Field",
+              "_glyph": 148,
+              "_showGlyph": false,
+              "Game/Game": "A2023_Charged_Up",
+              "Visuals/Robot Icon Size": 50.0,
+              "Visuals/Show Outside Circles": false
+            }
+          },
+          "3,0": {
             "size": [
               1,
               1
@@ -24,7 +55,7 @@
               "_showGlyph": false
             }
           },
-          "2,0": {
+          "4,0": {
             "size": [
               1,
               1
@@ -37,7 +68,7 @@
               "_showGlyph": false
             }
           },
-          "3,0": {
+          "5,0": {
             "size": [
               1,
               1
@@ -50,7 +81,7 @@
               "_showGlyph": false
             }
           },
-          "4,0": {
+          "6,0": {
             "size": [
               1,
               1
@@ -63,7 +94,7 @@
               "_showGlyph": false
             }
           },
-          "5,0": {
+          "7,0": {
             "size": [
               1,
               1
@@ -76,7 +107,7 @@
               "_showGlyph": false
             }
           },
-          "6,0": {
+          "8,0": {
             "size": [
               1,
               1
@@ -89,7 +120,7 @@
               "_showGlyph": false
             }
           },
-          "7,0": {
+          "9,0": {
             "size": [
               1,
               1
@@ -104,7 +135,7 @@
               "Colors/Color when false": "#8B0000FF"
             }
           },
-          "0,1": {
+          "10,0": {
             "size": [
               1,
               1
@@ -113,45 +144,6 @@
               "_type": "Text View",
               "_source0": "network_table:///SmartDashboard/Arm Position",
               "_title": "Arm Position",
-              "_glyph": 148,
-              "_showGlyph": false
-            }
-          },
-          "1,1": {
-            "size": [
-              1,
-              1
-            ],
-            "content": {
-              "_type": "Text View",
-              "_source0": "network_table:///SmartDashboard/limelight_PipelineName",
-              "_title": "limelight_PipelineName",
-              "_glyph": 148,
-              "_showGlyph": false
-            }
-          },
-          "2,1": {
-            "size": [
-              1,
-              1
-            ],
-            "content": {
-              "_type": "Text View",
-              "_source0": "network_table:///SmartDashboard/limelight_Stream",
-              "_title": "limelight_Stream",
-              "_glyph": 148,
-              "_showGlyph": false
-            }
-          },
-          "3,1": {
-            "size": [
-              1,
-              1
-            ],
-            "content": {
-              "_type": "Text View",
-              "_source0": "network_table:///SmartDashboard/limelight_Interface",
-              "_title": "limelight_Interface",
               "_glyph": 148,
               "_showGlyph": false
             }
@@ -174,9 +166,9 @@
     }
   ],
   "windowGeometry": {
-    "x": 0.6666666865348816,
-    "y": 0.6666666865348816,
-    "width": 1278.6666259765625,
-    "height": 750.6666870117188
+    "x": 0.0,
+    "y": 0.0,
+    "width": 3440.0,
+    "height": 1400.0
   }
 }

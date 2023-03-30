@@ -17,7 +17,6 @@ public class StreamDeck extends SubsystemBase {
 
     @Override
     public void periodic() {
-        super.periodic();
         // i hate that i have to do it like this but it is the best way
         for (int i = 1; i < 10; i++) {
             if (streamDeck.getRawButtonReleased(i)) {

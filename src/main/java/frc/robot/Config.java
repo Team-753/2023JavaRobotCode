@@ -1,7 +1,7 @@
 package frc.robot;
 
 import java.util.HashMap;
-
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import frc.robot.configs.SwerveModuleConfig;
 
 public class Config {
@@ -31,6 +31,37 @@ public class Config {
         public static int streamDeckPort = 2;
         public static double[] joystickDeadzones = {0.1, 0.1, 0.15};
     }
+    public static class DriveConstants {
+        public static Constraints turnControllerConstraints = new Constraints(TeleoperatedConstants.maxAngularVelocity, TeleoperatedConstants.maxAngularVelocity * 2);
+        public static double turnCommandP = 2;
+        public static double turnCommandI = 0;
+        public static double turnCommandD = 0;
+        public static double turnCommandAngleTolerance = Math.toRadians(0.5);
+        public static double turnCommandVelocityTolerance = turnCommandAngleTolerance / 2;
+        public static double swerveDriveFFkS = 0.1; // overcoming static friction
+        public static double swerveDriveFFkV = 0; // not needed
+        public static double swerveDriveFFkA = 0; // not needed
+        public static double drivingGearRatio = 8.14;
+        public static double turningGearRatio = 12.8;
+        public static double wheelDiameter = 0.1016;
+        public static class AutoPiecePickup {
+            public static Constraints turnControllerConstraints = new Constraints(TeleoperatedConstants.maxAngularVelocity, TeleoperatedConstants.maxAngularVelocity * 2); // these values are definitely wrong for vision lmao
+            public static double turnCommandP = 2;
+            public static double turnCommandI = 0;
+            public static double turnCommandD = 0;
+            public static double turnCommandAngleTolerance = Math.toRadians(0.375);
+            public static double turnCommandVelocityTolerance = turnCommandAngleTolerance / 2;
+            public static double piecePickupVelocity = 2; // 2 meters per second
+            public static double gamePieceXValue = 7.11835;
+            public static double[] gamePieceYValues = {0.919226, 2.138426, 3.357626, 4.576826};
+        }
+    }
+    public static class DEBUGGING {
+        public static boolean useDebugTab = true;
+        public static boolean reportSwervePositions = false;
+        public static boolean reportChassisSpeeds = true;
+    }
+
     public static class AutonomousConstants {
         public static double maxVelocity = 2;
         public static double maxAccel = 4;

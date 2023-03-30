@@ -13,9 +13,11 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import frc.robot.Config;
-import frc.robot.LimelightHelpers;
+import frc.robot.LimelightHelper;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.math.Vector;
@@ -43,8 +45,13 @@ public class DriveTrain extends SubsystemBase {
     private Timer tiltTimer = new Timer();
     private boolean isRedAlliance = false;
     private Field2d kField2d = new Field2d();
+    private ShuffleboardTab debuggingTab;
+    private double xVelocity = 0;
+    private double yVelocity = 0;
+    private double zVelocity = 0;
 
     public DriveTrain() {
+        SmartDashboard.putBoolean("isRedAlliance", false);
         navxAHRS = new AHRS();
         frontLeftModule = new SwerveModule(frc.robot.Config.DimensionalConstants.SwerveModuleConfigurations.get("frontLeftModule"));
         frontRightModule = new SwerveModule(frc.robot.Config.DimensionalConstants.SwerveModuleConfigurations.get("frontRightModule"));
@@ -62,6 +69,34 @@ public class DriveTrain extends SubsystemBase {
         goXModeCommand = run(() -> goXMode());
         tiltTimer.start();
         SmartDashboard.putData("Field", kField2d);
+        if (Config.DEBUGGING.useDebugTab) {
+            debuggingTab = Shuffleboard.getTab("DEBUGGING");
+            if (Config.DEBUGGING.reportChassisSpeeds) {
+                debuggingTab.addNumber("X Velocity", this::getXVelocity);
+                debuggingTab.addNumber("Y Velocity", this::getYVelocity);
+                debuggingTab.addNumber("Rotation Velocity", this::getZVelocity);
+            }
+            if (Config.DEBUGGING.reportSwervePositions) {
+                debuggingTab.addNumber("Front Left Module ABS", frontLeftModule::getRawAbsolutePosition);
+                debuggingTab.addNumber("Front Right Module ABS", frontRightModule::getRawAbsolutePosition);
+                debuggingTab.addNumber("Rear Left Module ABS", rearLeftModule::getRawAbsolutePosition);
+                debuggingTab.addNumber("Rear Right Module ABS", rearRightModule::getRawAbsolutePosition);
+                debuggingTab.addNumber("Front Left Module INT", frontLeftModule::getIntegratedPosition);
+                debuggingTab.addNumber("Front Right Module INT", frontRightModule::getIntegratedPosition);
+                debuggingTab.addNumber("Rear Left Module INT", rearLeftModule::getIntegratedPosition);
+                debuggingTab.addNumber("Rear Right Module INT", rearRightModule::getIntegratedPosition);
+            }
+          }
+    }
+
+    private double getXVelocity() {
+        return xVelocity;
+    }
+    private double getYVelocity() {
+        return yVelocity;
+    }
+    private double getZVelocity() {
+        return zVelocity;
     }
 
     private SwerveModulePosition[] getSwerveModulePositions() {
@@ -72,20 +107,20 @@ public class DriveTrain extends SubsystemBase {
     @Override
     public void periodic() {
         super.periodic();
-        poseEstimator.update(navxAHRS.getRotation2d(), getSwerveModulePositions());
-        if (LimelightHelpers.getCurrentPipelineIndex(Config.DimensionalConstants.limelightName) == 0 && LimelightHelpers.getTV(Config.DimensionalConstants.limelightName)) {
-            Pose3d poseToTag = LimelightHelpers.getCameraPose3d_TargetSpace(Config.DimensionalConstants.limelightName);
+        if (LimelightHelper.getCurrentPipelineIndex(Config.DimensionalConstants.limelightName) == 0 && LimelightHelper.getTV(Config.DimensionalConstants.limelightName)) {
+            Pose3d poseToTag = LimelightHelper.getCameraPose3d_TargetSpace(Config.DimensionalConstants.limelightName);
             double distance = poseToTag.toPose2d().getTranslation().getNorm();
             if (distance <= Config.DimensionalConstants.apriltagThresholdDistance) {
                 if (isRedAlliance) {
-                    poseEstimator.addVisionMeasurement(LimelightHelpers.getBotPose2d_wpiRed(Config.DimensionalConstants.limelightName), LimelightHelpers.getLatency_Capture(Config.DimensionalConstants.limelightName) + LimelightHelpers.getLatency_Pipeline(Config.DimensionalConstants.limelightName));
+                    poseEstimator.addVisionMeasurement(LimelightHelper.getBotPose2d_wpiRed(Config.DimensionalConstants.limelightName), LimelightHelper.getLatency_Capture(Config.DimensionalConstants.limelightName) + LimelightHelper.getLatency_Pipeline(Config.DimensionalConstants.limelightName));
                 }
                 else {
-                    poseEstimator.addVisionMeasurement(LimelightHelpers.getBotPose2d_wpiBlue(Config.DimensionalConstants.limelightName), LimelightHelpers.getLatency_Capture(Config.DimensionalConstants.limelightName) + LimelightHelpers.getLatency_Pipeline(Config.DimensionalConstants.limelightName));
+                    poseEstimator.addVisionMeasurement(LimelightHelper.getBotPose2d_wpiBlue(Config.DimensionalConstants.limelightName), LimelightHelper.getLatency_Capture(Config.DimensionalConstants.limelightName) + LimelightHelper.getLatency_Pipeline(Config.DimensionalConstants.limelightName));
                 }
             }
         }
-        Pose2d currentEstimatedPose = getEstimatedPose();
+        
+        Pose2d currentEstimatedPose = poseEstimator.update(navxAHRS.getRotation2d(), getSwerveModulePositions());
         double oldTilt = currentTilt;
         double oldTime = tiltTimeStamp;
         double pitch = navxAHRS.getPitch();
@@ -105,6 +140,12 @@ public class DriveTrain extends SubsystemBase {
         else {
             kField2d.setRobotPose(currentEstimatedPose);
         }
+        if (Config.DEBUGGING.useDebugTab && Config.DEBUGGING.reportChassisSpeeds) {
+            updateChassisSpeeds();
+        }
+        // if (Config.DEBUGGING.useDebugTab && Config.DEBUGGING.reportSwervePositions) {
+            
+        // }
     }
 
     public double getDeltaTilt() {
@@ -120,9 +161,11 @@ public class DriveTrain extends SubsystemBase {
     public void setRedAlliance(boolean kIsRedAlliance) {
         if (kIsRedAlliance) {
             isRedAlliance = true;
+            SmartDashboard.putBoolean("isRedAlliance", kIsRedAlliance);
         }
         else {
             isRedAlliance = false;
+            SmartDashboard.putBoolean("isRedAlliance", kIsRedAlliance);
         }
     }
 
@@ -132,6 +175,12 @@ public class DriveTrain extends SubsystemBase {
 
     public ChassisSpeeds actualChassisSpeeds() {
         return ChassisSpeeds.fromFieldRelativeSpeeds(kinematics.toChassisSpeeds(frontLeftModule.getSwerveModuleState(), frontRightModule.getSwerveModuleState(), rearLeftModule.getSwerveModuleState(), rearRightModule.getSwerveModuleState()), Rotation2d.fromRadians(-getEstimatedPose().getRotation().getRadians()));
+    }
+    private void updateChassisSpeeds() {
+        ChassisSpeeds speeds = ChassisSpeeds.fromFieldRelativeSpeeds(kinematics.toChassisSpeeds(frontLeftModule.getSwerveModuleState(), frontRightModule.getSwerveModuleState(), rearLeftModule.getSwerveModuleState(), rearRightModule.getSwerveModuleState()), Rotation2d.fromRadians(-getEstimatedPose().getRotation().getRadians()));
+        xVelocity = speeds.vxMetersPerSecond;
+        yVelocity = speeds.vyMetersPerSecond;
+        zVelocity = speeds.omegaRadiansPerSecond;
     }
 
     private void enableSpeedLimiter() {
@@ -203,6 +252,25 @@ public class DriveTrain extends SubsystemBase {
         frontRightModule.setState(moduleStates[1]);
         rearLeftModule.setState(moduleStates[2]);
         rearRightModule.setState(moduleStates[3]);
+    }
+
+    public void setChassisSpeeds(double xVelocity, double yVelocity, double zVelocity, boolean fieldOrient) {
+        if (fieldOrient) {
+        SwerveModuleState[] moduleStates = kinematics.toSwerveModuleStates(ChassisSpeeds.fromFieldRelativeSpeeds(xVelocity, yVelocity, zVelocity, getEstimatedPose().getRotation()));
+        SwerveDriveKinematics.desaturateWheelSpeeds(moduleStates, Config.TeleoperatedConstants.maxVelocity);
+        frontLeftModule.setState(moduleStates[0]);
+        frontRightModule.setState(moduleStates[1]);
+        rearLeftModule.setState(moduleStates[2]);
+        rearRightModule.setState(moduleStates[3]);
+        }
+        else {
+        SwerveModuleState[] moduleStates = kinematics.toSwerveModuleStates(new ChassisSpeeds(xVelocity, yVelocity, zVelocity));
+        SwerveDriveKinematics.desaturateWheelSpeeds(moduleStates, Config.TeleoperatedConstants.maxVelocity);
+        frontLeftModule.setState(moduleStates[0]);
+        frontRightModule.setState(moduleStates[1]);
+        rearLeftModule.setState(moduleStates[2]);
+        rearRightModule.setState(moduleStates[3]);
+        }
     }
 
     public void resetPose(Pose2d poseToSet) {
