@@ -26,9 +26,9 @@
               "Colors/Color when false": "#8B0000FF"
             }
           },
-          "0,1": {
+          "3,2": {
             "size": [
-              3,
+              4,
               2
             ],
             "content": {
@@ -83,22 +83,18 @@
           },
           "6,0": {
             "size": [
-              2,
-              2
+              1,
+              1
             ],
             "content": {
-              "_type": "Gyro",
+              "_type": "Text View",
               "_source0": "network_table:///SmartDashboard/Rotation",
               "_title": "Rotation",
               "_glyph": 148,
-              "_showGlyph": false,
-              "Visuals/Major tick spacing": 45.0,
-              "Visuals/Starting angle": 180.0,
-              "Visuals/Show tick mark ring": true,
-              "Visuals/Counter clockwise": false
+              "_showGlyph": false
             }
           },
-          "7,2": {
+          "7,0": {
             "size": [
               1,
               1
@@ -111,7 +107,7 @@
               "_showGlyph": false
             }
           },
-          "6,2": {
+          "0,1": {
             "size": [
               1,
               1
@@ -124,7 +120,7 @@
               "_showGlyph": false
             }
           },
-          "9,0": {
+          "1,1": {
             "size": [
               1,
               1
@@ -139,7 +135,7 @@
               "Colors/Color when false": "#8B0000FF"
             }
           },
-          "10,0": {
+          "2,1": {
             "size": [
               1,
               1
@@ -152,7 +148,7 @@
               "_showGlyph": false
             }
           },
-          "1,0": {
+          "3,1": {
             "size": [
               1,
               1
@@ -165,7 +161,7 @@
               "_showGlyph": false
             }
           },
-          "2,0": {
+          "4,1": {
             "size": [
               1,
               1
@@ -178,7 +174,7 @@
               "_showGlyph": false
             }
           },
-          "11,0": {
+          "5,1": {
             "size": [
               1,
               1
@@ -191,7 +187,7 @@
               "_showGlyph": false
             }
           },
-          "6,3": {
+          "6,1": {
             "size": [
               1,
               1
@@ -204,53 +200,97 @@
               "_showGlyph": false
             }
           },
-          "2,3": {
+          "7,1": {
             "size": [
               1,
               1
             ],
             "content": {
-              "_type": "Boolean Box",
-              "_source0": "network_table:///SmartDashboard/Limit Switch",
-              "_title": "SmartDashboard/Limit Switch",
+              "_type": "ComboBox Chooser",
+              "_source0": "network_table:///SmartDashboard/Auto Piece Chooser",
+              "_title": "Auto Piece Chooser",
               "_glyph": 148,
-              "_showGlyph": false,
-              "Colors/Color when true": "#7CFC00FF",
-              "Colors/Color when false": "#8B0000FF"
+              "_showGlyph": false
             }
           },
-          "1,3": {
+          "0,2": {
             "size": [
               1,
               1
             ],
             "content": {
               "_type": "Text View",
-              "_source0": "network_table:///SmartDashboard/Arm Position",
-              "_title": "SmartDashboard/Arm Position",
+              "_source0": "network_table:///SmartDashboard/Target Pose",
+              "_title": "Target Pose",
               "_glyph": 148,
               "_showGlyph": false
             }
           },
-          "3,1": {
+          "2,2": {
             "size": [
-              3,
-              2
+              1,
+              1
             ],
             "content": {
-              "_type": "Camera Stream",
-              "_source0": "camera_server://limelight",
-              "_title": "limelight",
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Tag Distance",
+              "_title": "Tag Distance",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "1,0": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Boolean Box",
+              "_source0": "network_table:///SmartDashboard/Autonomous Finished",
+              "_title": "Autonomous Finished",
               "_glyph": 148,
               "_showGlyph": false,
-              "Crosshair/Show crosshair": false,
-              "Crosshair/Crosshair color": "#FFFFFFFF",
-              "Controls/Show controls": false,
-              "Controls/Rotation": "NONE",
-              "compression": -1.0,
-              "fps": -1,
-              "imageWidth": -1,
-              "imageHeight": -1
+              "Colors/Color when true": "#7CFC00FF",
+              "Colors/Color when false": "#8B0000FF"
+            }
+          },
+          "2,0": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/PPSwerveControllerCommand/xErrorMeters",
+              "_title": "PPSwerveControllerCommand/xErrorMeters",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "8,0": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/PPSwerveControllerCommand/yErrorMeters",
+              "_title": "PPSwerveControllerCommand/yErrorMeters",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "8,1": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/PPSwerveControllerCommand/rotationErrorDegrees",
+              "_title": "PPSwerveControllerCommand/rotationErrorDegrees",
+              "_glyph": 148,
+              "_showGlyph": false
             }
           }
         }

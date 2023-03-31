@@ -29,7 +29,10 @@ public class TurnToPieceCommand extends CommandBase {
 
     @Override
     public void execute() {
-        driveTrain.setChassisSpeeds(0.0, 0.0, angleController.calculate(driveTrain.getEstimatedPose().getRotation().getRadians(), targetState), true);
+        double output = angleController.calculate(driveTrain.getEstimatedPose().getRotation().getRadians(), targetState);
+        driveTrain.setChassisSpeeds(0.0, 0.0, output, true);
+        System.out.println(String.format("Output %f", output));
+        System.out.println(String.format("Target %f", Math.toDegrees(targetState.position)));
     }
 
     @Override
@@ -66,6 +69,7 @@ public class TurnToPieceCommand extends CommandBase {
         if (DriverStation.getAlliance().equals(DriverStation.Alliance.Red)) {
           targetGamePieceY = Config.DimensionalConstants.fieldHeight - targetGamePieceY; // re-orienting it back to blue alliance for the math
         }
-        return new Rotation2d(currentPose2d.getX() - Config.DriveConstants.AutoPiecePickup.gamePieceXValue, currentPose2d.getY() - targetGamePieceY); // the angle computed towards the game piece
+        Rotation2d thingy = new Rotation2d(currentPose2d.getX() - Config.DriveConstants.AutoPiecePickup.gamePieceXValue, currentPose2d.getY() - targetGamePieceY); // the angle computed towards the game piece
+        return thingy.rotateBy(Rotation2d.fromRadians(Math.PI));
       }
 }

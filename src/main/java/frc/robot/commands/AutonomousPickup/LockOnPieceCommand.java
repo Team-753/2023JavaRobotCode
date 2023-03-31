@@ -7,12 +7,14 @@ import frc.robot.subsystems.Mandible;
 import frc.robot.subsystems.Drive.DriveTrain;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.networktables.NetworkTableInstance;
 
 public class LockOnPieceCommand extends CommandBase {
     private DriveTrain driveTrain;
     private Mandible mandible;
     private TrapezoidProfile.State targetState = new TrapezoidProfile.State(0, 0); // in radians
     private ProfiledPIDController angleController;
+    private NetworkTableInstance table;
     
     public LockOnPieceCommand(DriveTrain kDriveTrain, Mandible kMandible) {
         driveTrain = kDriveTrain;
@@ -21,6 +23,7 @@ public class LockOnPieceCommand extends CommandBase {
         angleController.setTolerance(Config.DriveConstants.AutoPiecePickup.turnCommandAngleTolerance, Config.DriveConstants.AutoPiecePickup.turnCommandVelocityTolerance);
         angleController.enableContinuousInput(-Math.PI, Math.PI);
         addRequirements(driveTrain, mandible);
+        table = NetworkTableInstance.create();
     }
 
     @Override
@@ -30,10 +33,13 @@ public class LockOnPieceCommand extends CommandBase {
 
     @Override
     public void execute() {
+        System.out.println(LimelightHelper.getTV(Config.DimensionalConstants.limelightName));
         if (LimelightHelper.getTV(Config.DimensionalConstants.limelightName)) {
             // we see a valid target; lets aim at it
-            double ID = LimelightHelper.getNeuralClassID(Config.DimensionalConstants.limelightName);
-            if (ID == 0.0) {
+            //double ID = LimelightHelper.getNeuralClassID(Config.DimensionalConstants.limelightName);
+            String ID = NetworkTableInstance.getDefault().getTable("limelight").getEntry("tclass").getString("Nada");
+            System.out.println(ID);
+            if (ID.strip().equals("cone")) {
                 // it is a cone
                 mandible.setOpen(false);
             }

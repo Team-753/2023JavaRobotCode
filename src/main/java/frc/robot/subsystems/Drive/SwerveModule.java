@@ -40,11 +40,11 @@ public class SwerveModule {
         TalonFXConfiguration turnMotorConfig = new TalonFXConfiguration();
         turnMotorConfig.absoluteSensorRange = AbsoluteSensorRange.Unsigned_0_to_360;
         turnMotorConfig.initializationStrategy = SensorInitializationStrategy.BootToZero;
-        turnMotorConfig.slot0.kP = 0.1;
-        turnMotorConfig.slot0.kI = 0.0001;
+        turnMotorConfig.slot0.kP = 0.15; //0.1
+        turnMotorConfig.slot0.kI = 0.01;
         turnMotorConfig.slot0.kD = 0.0001;
         turnMotorConfig.slot0.kF = 0;
-        turnMotorConfig.slot0.integralZone = 100;
+        turnMotorConfig.slot0.integralZone = 500;
         turnMotorConfig.slot0.allowableClosedloopError = 0;
         SupplyCurrentLimitConfiguration turnSupplyCurrentConfig = new SupplyCurrentLimitConfiguration();
         turnSupplyCurrentConfig.currentLimit = 30.0;
@@ -57,7 +57,7 @@ public class SwerveModule {
         driveMotorConfig.slot0.kP = 0.0005;
         driveMotorConfig.slot0.kI = 0.0005;
         driveMotorConfig.slot0.kD = 0.0000;
-        driveMotorConfig.slot0.kF = 0.045;
+        driveMotorConfig.slot0.kF = 0.046;
         driveMotorConfig.slot0.integralZone = 500;
         driveMotorConfig.slot0.allowableClosedloopError = 0;
         SupplyCurrentLimitConfiguration driveSupplyCurrentConfig = new SupplyCurrentLimitConfiguration();
@@ -89,7 +89,7 @@ public class SwerveModule {
     public void setState(SwerveModuleState state) {
         SwerveModuleState desiredState = SwerveModuleState.optimize(state, getIntegratedState());
         double velocity = desiredState.speedMetersPerSecond;
-        if (velocity == 0.0) {
+        if (Math.abs(velocity) < 0.1) { // lowest speed is 0.1 m/s
             driveMotor.set(ControlMode.PercentOutput, 0);
         }
         else {

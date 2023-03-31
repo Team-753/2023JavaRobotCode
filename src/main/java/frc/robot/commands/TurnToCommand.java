@@ -33,6 +33,6 @@ public class TurnToCommand extends CommandBase {
 
     @Override
     public boolean isFinished() {
-        return angleController.atGoal();
+        return angleController.atSetpoint();
     }
 }

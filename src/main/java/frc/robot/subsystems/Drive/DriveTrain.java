@@ -63,7 +63,7 @@ public class DriveTrain extends SubsystemBase {
             new Translation2d(-frc.robot.Config.DimensionalConstants.trackWidth / 2, frc.robot.Config.DimensionalConstants.wheelBase / 2), // rear left module
             new Translation2d(-frc.robot.Config.DimensionalConstants.trackWidth / 2, -frc.robot.Config.DimensionalConstants.wheelBase / 2) // rear right module
             ); 
-        poseEstimator = new SwerveDrivePoseEstimator(kinematics, navxAHRS.getRotation2d(), getSwerveModulePositions(), new Pose2d(), stateStdDevs, visionMeasurementStdDevs);
+        poseEstimator = new SwerveDrivePoseEstimator(kinematics, navxAHRS.getRotation2d(), getSwerveModulePositions(), new Pose2d(0, 0, Rotation2d.fromRadians(Math.PI)), stateStdDevs, visionMeasurementStdDevs);
         enableSpeedLimiterCommand = runOnce(() -> enableSpeedLimiter());
         disableSpeedLimiterCommand = runOnce(() -> disableSpeedLimiter());
         goXModeCommand = run(() -> goXMode());
@@ -107,9 +107,11 @@ public class DriveTrain extends SubsystemBase {
     @Override
     public void periodic() {
         super.periodic();
-        if (LimelightHelper.getCurrentPipelineIndex(Config.DimensionalConstants.limelightName) == 0 && LimelightHelper.getTV(Config.DimensionalConstants.limelightName)) {
+        if (LimelightHelper.getCurrentPipelineIndex(Config.DimensionalConstants.limelightName) == 0.0 && LimelightHelper.getTV(Config.DimensionalConstants.limelightName)) {
             Pose3d poseToTag = LimelightHelper.getCameraPose3d_TargetSpace(Config.DimensionalConstants.limelightName);
-            double distance = poseToTag.toPose2d().getTranslation().getNorm();
+            Translation2d translation = poseToTag.toPose2d().getTranslation();
+            double distance = Math.hypot(translation.getX(), translation.getY());
+            SmartDashboard.putNumber("Tag Distance", distance);
             if (distance <= Config.DimensionalConstants.apriltagThresholdDistance) {
                 if (isRedAlliance) {
                     poseEstimator.addVisionMeasurement(LimelightHelper.getBotPose2d_wpiRed(Config.DimensionalConstants.limelightName), LimelightHelper.getLatency_Capture(Config.DimensionalConstants.limelightName) + LimelightHelper.getLatency_Pipeline(Config.DimensionalConstants.limelightName));
@@ -282,8 +284,11 @@ public class DriveTrain extends SubsystemBase {
         if (Math.abs(speeds.vxMetersPerSecond) < Config.AutonomousConstants.lowestVelocity && Math.abs(speeds.vyMetersPerSecond) < Config.AutonomousConstants.lowestVelocity && Math.abs(speeds.omegaRadiansPerSecond) < Config.AutonomousConstants.lowestAngularVelocity) {
             stationary();
         }
+        // speeds.vxMetersPerSecond = -speeds.vxMetersPerSecond;
+        // speeds.vyMetersPerSecond = -speeds.vyMetersPerSecond;
         //speeds.omegaRadiansPerSecond = -speeds.omegaRadiansPerSecond; // not sure if this is totally necessary
-        SwerveModuleState[] moduleStates = kinematics.toSwerveModuleStates(ChassisSpeeds.fromFieldRelativeSpeeds(speeds, getEstimatedPose().getRotation()));
+        //SwerveModuleState[] moduleStates = kinematics.toSwerveModuleStates(ChassisSpeeds.fromFieldRelativeSpeeds(speeds, getEstimatedPose().getRotation()));
+        SwerveModuleState[] moduleStates = kinematics.toSwerveModuleStates(speeds);
         SwerveDriveKinematics.desaturateWheelSpeeds(moduleStates, Config.AutonomousConstants.maxVelocity);
         frontLeftModule.setState(moduleStates[0]);
         frontRightModule.setState(moduleStates[1]);

@@ -1,8 +1,7 @@
 package frc.robot.commands.AutonomousPlacement;
 
-import com.pathplanner.lib.auto.SwerveAutoBuilder;
-
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Config;
 import frc.robot.subsystems.StreamDeck;
@@ -27,19 +26,19 @@ public class MoveToPlacementCommand extends CommandBase {
     private final Timer timer = new Timer();
     private final PPHolonomicDriveController controller;
     private PathPlannerTrajectory trajectory;
-    DriveTrain driveTrain;
-    SendableChooser<Integer> secondPieceChooser;
-    StreamDeck streamDeck;
+    private DriveTrain driveTrain;
+    private SendableChooser<Integer> secondPieceChooser;
+    private StreamDeck streamDeck;
     boolean isAuto;
 
-    public MoveToPlacementCommand(DriveTrain kDriveTrain, SwerveAutoBuilder kBareBonesAutoBuilder, SendableChooser<Integer> kSecondPieceChooser) { // this one is for autonomous
+    public MoveToPlacementCommand(DriveTrain kDriveTrain, SendableChooser<Integer> kSecondPieceChooser) { // this one is for autonomous
         driveTrain = kDriveTrain;
         secondPieceChooser = kSecondPieceChooser;
         controller = new PPHolonomicDriveController(pidControllerFromConstants(Config.AutonomousConstants.translationConstants), pidControllerFromConstants(Config.AutonomousConstants.translationConstants), pidControllerFromConstants(Config.AutonomousConstants.rotationConstants));
         isAuto = true;
     }
 
-    public MoveToPlacementCommand(DriveTrain kDriveTrain, SwerveAutoBuilder kBareBonesAutoBuilder, StreamDeck kStreamDeck) { // this one is for teleoperated auto placement
+    public MoveToPlacementCommand(DriveTrain kDriveTrain, StreamDeck kStreamDeck) { // this one is for teleoperated auto placement
         driveTrain = kDriveTrain;
         streamDeck = kStreamDeck;
         controller = new PPHolonomicDriveController(pidControllerFromConstants(Config.AutonomousConstants.translationConstants), pidControllerFromConstants(Config.AutonomousConstants.translationConstants), pidControllerFromConstants(Config.AutonomousConstants.rotationConstants));
@@ -99,6 +98,7 @@ public class MoveToPlacementCommand extends CommandBase {
             }
         }
         Pose2d targetPose2d = new Pose2d(new Translation2d(x + offset, y), Rotation2d.fromRadians(Math.PI));
+        SmartDashboard.putString("Target Pose", String.format("X: %f, Y: %f, Z: %f", targetPose2d.getX(), targetPose2d.getY(), targetPose2d.getRotation().getDegrees()));
         return PathPlanner.generatePath(Config.AutonomousConstants.onTheFlyConstraints, PathPoint.fromCurrentHolonomicState(currentPose, driveTrain.actualChassisSpeeds()), new PathPoint(targetPose2d.getTranslation(), Rotation2d.fromRadians(Math.PI), targetPose2d.getRotation()));
     }
 

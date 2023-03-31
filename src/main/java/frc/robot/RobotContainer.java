@@ -29,6 +29,7 @@ import frc.robot.commands.AutonomousPickup.DriveUntilOnPieceCommand;
 import frc.robot.commands.AutonomousPickup.LockOnPieceCommand;
 import frc.robot.commands.AutonomousPickup.TurnToPieceCommand;
 import frc.robot.commands.AutonomousPlacement.CalculateArmPositionCommand;
+import frc.robot.commands.AutonomousPlacement.DriverConfirmCommand;
 import frc.robot.commands.AutonomousPlacement.MandiblePlacementCommand;
 import frc.robot.commands.AutonomousPlacement.MoveToPlacementCommand;
 import frc.robot.subsystems.Arm;
@@ -48,7 +49,6 @@ public class RobotContainer {
   private Arm arm;
   private StreamDeck streamDeck;
   private SwerveAutoBuilder swerveAutoBuilder;
-  private SwerveAutoBuilder bareBonesAutoBuilder;
   private HashMap<String, Command> eventMap;
   private CommandJoystick joystick;
   private CommandXboxController xboxController;
@@ -61,6 +61,7 @@ public class RobotContainer {
     if (Config.AutonomousConstants.usePPServer) {
       PathPlannerServer.startServer(5811);
     }
+    LimelightHelper.setPipelineIndex(Config.DimensionalConstants.limelightName, 0);
     // initialize subsystems
     driveTrain = new DriveTrain();
     arm = new Arm();
@@ -80,21 +81,21 @@ public class RobotContainer {
 
     autoPathConstraints = new PathConstraints(Config.AutonomousConstants.maxVelocity, Config.AutonomousConstants.maxAccel);
     // we need this for on the fly generation w/ no eventmap and no alliance color 
-    bareBonesAutoBuilder = new SwerveAutoBuilder(driveTrain::getEstimatedPose, driveTrain::dummyResetPose, new PIDConstants(Config.AutonomousConstants.translationKP, Config.AutonomousConstants.translationKI, Config.AutonomousConstants.translationKD), new PIDConstants(Config.AutonomousConstants.rotationKP, Config.AutonomousConstants.rotationKI, Config.AutonomousConstants.rotationKD), driveTrain::PPDrive, null, false, driveTrain);
     generateEventMap();
-    swerveAutoBuilder = new SwerveAutoBuilder(driveTrain::getEstimatedPose, driveTrain::dummyResetPose, new PIDConstants(Config.AutonomousConstants.translationKP, Config.AutonomousConstants.translationKI, Config.AutonomousConstants.translationKD), new PIDConstants(Config.AutonomousConstants.rotationKP, Config.AutonomousConstants.rotationKI, Config.AutonomousConstants.rotationKD), driveTrain::PPDrive, eventMap, true, driveTrain);
+    swerveAutoBuilder = new SwerveAutoBuilder(driveTrain::getEstimatedPose, driveTrain::resetPose, new PIDConstants(Config.AutonomousConstants.translationKP, Config.AutonomousConstants.translationKI, Config.AutonomousConstants.translationKD), new PIDConstants(Config.AutonomousConstants.rotationKP, Config.AutonomousConstants.rotationKI, Config.AutonomousConstants.rotationKD), driveTrain::PPDrive, eventMap, true, driveTrain);
     configureBindings();
 
     // setting our autos
     autoChooser.setDefaultOption("Place Cube", "Place Cube");
     autoChooser.addOption("Charge", "Charge");
+    autoChooser.addOption("Cable Protector 2 Piece", "Cable Protector 2 Piece");
     // Grabbing the auto path names as to automatically populate our dashboard
-    File f = new File(System.getProperty("user.dir") + "/src/main/deploy/pathplanner");
-    pathnames = f.list();
-    for (int i = 0; i < pathnames.length; i++) {
-      pathnames[i] = pathnames[i].replace(".path", "");
-      autoChooser.addOption(pathnames[i], pathnames[i]);
-    }
+    // File f = new File(System.getProperty("user.dir") + "/src/main/deploy/pathplanner");
+    // pathnames = f.list();
+    // for (int i = 0; i < pathnames.length; i++) {
+    //   pathnames[i] = pathnames[i].replace(".path", "");
+    //   autoChooser.addOption(pathnames[i], pathnames[i]);
+    // }
     //autoChooser.addOption("Testing", "Testing");
     SmartDashboard.putData("Autonomous Chooser", autoChooser);
 
@@ -129,8 +130,30 @@ public class RobotContainer {
     Trigger joystickEleven = joystick.button(11);
     joystickEleven.whileTrue(Commands.runOnce(() -> driveTrain.resetPose(new Pose2d()), driveTrain));
 
+    Trigger joystickTen = joystick.button(10);
+    joystickTen.whileTrue(new DriveInDirectionCommand(driveTrain, 1, 0, 0, false));
+
+    Trigger joystickNine = joystick.button(9);
+    joystickNine.whileTrue(new SequentialCommandGroup(
+      // new SetArmPositionCommand(arm, "FloorPickupPrep"), // getting the arm into position
+      new TurnToPieceCommand(driveTrain), // turning to the expected angle of the game piece
+      new LockOnPieceCommand(driveTrain, mandible), // doing the final correction using the limelight google coral pipeline
+      new ArmConfirmPositionCommand(arm, "Floor"), // moving the arm into pickup position
+      new ParallelRaceGroup(
+        Commands.run(() -> mandible.intakeWheels(), mandible), // spinning the intake in
+        new DriveUntilOnPieceCommand(driveTrain)), // driving straight forward until we pass over the piece
+        Commands.run(() -> mandible.passiveIntake()), // stop intaking
+      new SetArmPositionCommand(arm, "Optimized")));
+
     Trigger joystickTwo = joystick.button(2);
-    joystickTwo.onTrue(new DriveInDirectionCommand(driveTrain, 2, 0, 0));
+    joystickTwo.whileTrue(new SequentialCommandGroup(
+      new CalculateArmPositionCommand(arm, streamDeck, false),
+      new MoveToPlacementCommand(driveTrain, streamDeck),
+      new DriverConfirmCommand(joystick, driveTrain),
+      new CalculateArmPositionCommand(arm, streamDeck, true),
+      new MandiblePlacementCommand(mandible),
+      new SetArmPositionCommand(arm, "Optimized")
+    ));
 
     xboxController.x().onTrue(Commands.runOnce(() -> mandible.setOpen(false), mandible));
     xboxController.b().onTrue(Commands.runOnce(() -> mandible.setOpen(true), mandible));
@@ -174,17 +197,18 @@ public class RobotContainer {
       new LockOnPieceCommand(driveTrain, mandible), // doing the final correction using the limelight google coral pipeline
       new ArmConfirmPositionCommand(arm, "Floor"), // moving the arm into pickup position
       new ParallelRaceGroup(
-        mandible.toggleIntakeInCommand, // spinning the intake in
+        Commands.run(() -> mandible.intakeWheels(), mandible), // spinning the intake in
         new DriveUntilOnPieceCommand(driveTrain)), // driving straight forward until we pass over the piece
-      mandible.toggleIntakeOffCommand, // stop intaking
+        Commands.run(() -> mandible.passiveIntake()), // stop intaking
       new SetArmPositionCommand(arm, "Optimized"))); // setting the arm back up
     eventMap.put("Place Piece", new SequentialCommandGroup(
       new CalculateArmPositionCommand(arm, secondPiecePlacementChooser, false),
-      new MoveToPlacementCommand(driveTrain, bareBonesAutoBuilder, secondPiecePlacementChooser),
+      new MoveToPlacementCommand(driveTrain, secondPiecePlacementChooser),
       new CalculateArmPositionCommand(arm, secondPiecePlacementChooser, true),
       new MandiblePlacementCommand(mandible),
       new SetArmPositionCommand(arm, "Optimized")
     ));
+    eventMap.put("ArmFloorPickupPrep", new SetArmPositionCommand(arm, "FloorPickupPrep"));
   }
 
   public void disabledPeriodic() {

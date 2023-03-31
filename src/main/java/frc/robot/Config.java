@@ -72,12 +72,12 @@ public class Config {
     }
     public static class DriveConstants {
         public static Constraints turnControllerConstraints = new Constraints(TeleoperatedConstants.maxAngularVelocity, TeleoperatedConstants.maxAngularVelocity * 2);
-        public static double turnCommandP = 2;
-        public static double turnCommandI = 0;
-        public static double turnCommandD = 0;
-        public static double turnCommandAngleTolerance = Math.toRadians(0.5);
+        public static double turnCommandP = 2; //
+        public static double turnCommandI = 2.5;
+        public static double turnCommandD = 0.0;
+        public static double turnCommandAngleTolerance = Math.toRadians(3);
         public static double turnCommandVelocityTolerance = turnCommandAngleTolerance / 2;
-        public static double swerveDriveFFkS = 0.1; // overcoming static friction
+        public static double swerveDriveFFkS = 0.0875; // overcoming static friction
         public static double swerveDriveFFkV = 0; // not needed
         public static double swerveDriveFFkA = 0; // not needed
         public static double drivingGearRatio = 8.14;
@@ -85,8 +85,8 @@ public class Config {
         public static double wheelDiameter = 0.1016;
         public static class AutoPiecePickup {
             public static Constraints turnControllerConstraints = new Constraints(TeleoperatedConstants.maxAngularVelocity, TeleoperatedConstants.maxAngularVelocity * 2); // these values are definitely wrong for vision lmao
-            public static double turnCommandP = 2;
-            public static double turnCommandI = 0;
+            public static double turnCommandP = 4;
+            public static double turnCommandI = 3.5;
             public static double turnCommandD = 0;
             public static double turnCommandAngleTolerance = Math.toRadians(0.375);
             public static double turnCommandVelocityTolerance = turnCommandAngleTolerance / 2;
@@ -105,23 +105,23 @@ public class Config {
     }
     public static class DEBUGGING {
         public static boolean useDebugTab = true;
-        public static boolean reportSwervePositions = false;
+        public static boolean reportSwervePositions = true;
         public static boolean reportChassisSpeeds = true;
     }
 
     public static class AutonomousConstants {
         public static double maxVelocity = 2;
-        public static double maxAccel = 4;
+        public static double maxAccel = 3;
         public static double lowestVelocity = 0.05;
         public static double lowestAngularVelocity = 0.1;
-        public static double translationKP = 5;
+        public static double translationKP = 5; // 5
         public static double translationKI = 0;
         public static double translationKD = 0;
-        public static double rotationKP = 3;
+        public static double rotationKP = 1; // 3
         public static double rotationKI = 0;
         public static double rotationKD = 0;
         public static boolean usePPServer = true;
-        public static PathConstraints onTheFlyConstraints = new PathConstraints(maxVelocity, maxAccel);
+        public static PathConstraints onTheFlyConstraints = new PathConstraints(1, 2);
         public static PIDConstants translationConstants = new PIDConstants(translationKP, translationKI, translationKD);
         public static PIDConstants rotationConstants = new PIDConstants(rotationKP, rotationKI, rotationKD);
     }
@@ -146,7 +146,7 @@ public class Config {
         static {
             armValues.put("FullyRetracted", 0.0);
             armValues.put("Substation", 37.9);
-            armValues.put("Floor", 41.75);
+            armValues.put("Floor", 42.05);
             armValues.put("BottomPlacement", 40.4);
             armValues.put("HighConePrep", 35.2);
             armValues.put("HighConePlacement", 37.16);
