@@ -25,7 +25,7 @@ public class DriveUntilOnPieceCommand extends CommandBase {
 
     @Override
     public boolean isFinished() {
-        return driveTrain.getEstimatedPose().getX() >= Config.DriveConstants.AutoPiecePickup.gamePieceXValue; // have we passed over the game piece line yet
+        return driveTrain.getEstimatedPose().getX() >= Config.DriveConstants.AutoPiecePickup.gamePieceXValue || Config.DEBUGGING.bypassAutoChecks; // have we passed over the game piece line yet
     }
 
 }

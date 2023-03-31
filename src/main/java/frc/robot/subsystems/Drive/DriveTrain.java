@@ -30,10 +30,10 @@ public class DriveTrain extends SubsystemBase {
     private SwerveModule frontRightModule;
     private SwerveModule rearLeftModule;
     private SwerveModule rearRightModule;
-    private SwerveDriveKinematics kinematics;
+    public SwerveDriveKinematics kinematics;
     private SwerveDrivePoseEstimator poseEstimator;
-    private static final Vector<N3> stateStdDevs = VecBuilder.fill(2, 2, 2);
-    private static final Vector<N3> visionMeasurementStdDevs = VecBuilder.fill(0.5, 0.5, 0.5);
+    private static final Vector<N3> stateStdDevs = VecBuilder.fill(0.05, 0.05, Math.toRadians(5));
+    private static final Vector<N3> visionMeasurementStdDevs = VecBuilder.fill(0.5, 0.5, Math.toRadians(30));
     private double speedLimitingFactor = 1;
     public Command enableSpeedLimiterCommand;
     public Command disableSpeedLimiterCommand;
@@ -193,7 +193,7 @@ public class DriveTrain extends SubsystemBase {
         speedLimitingFactor = 1;
     }
 
-    private void goXMode() {
+    public void goXMode() {
         frontLeftModule.XMode();
         frontRightModule.XMode();
         rearLeftModule.XMode();
@@ -276,19 +276,28 @@ public class DriveTrain extends SubsystemBase {
     }
 
     public void resetPose(Pose2d poseToSet) {
-        poseEstimator.resetPosition(navxAHRS.getRotation2d(), getSwerveModulePositions(), poseToSet);
-    }
-    public void dummyResetPose(Pose2d nada) {} // screw off PP we are not resetting our pose
-
-    public void PPDrive(ChassisSpeeds speeds) {
-        if (Math.abs(speeds.vxMetersPerSecond) < Config.AutonomousConstants.lowestVelocity && Math.abs(speeds.vyMetersPerSecond) < Config.AutonomousConstants.lowestVelocity && Math.abs(speeds.omegaRadiansPerSecond) < Config.AutonomousConstants.lowestAngularVelocity) {
-            stationary();
+        if (Config.AutonomousConstants.usePoseReset) {
+            poseEstimator.resetPosition(navxAHRS.getRotation2d(), getSwerveModulePositions(), poseToSet);
         }
-        // speeds.vxMetersPerSecond = -speeds.vxMetersPerSecond;
-        // speeds.vyMetersPerSecond = -speeds.vyMetersPerSecond;
-        //speeds.omegaRadiansPerSecond = -speeds.omegaRadiansPerSecond; // not sure if this is totally necessary
-        //SwerveModuleState[] moduleStates = kinematics.toSwerveModuleStates(ChassisSpeeds.fromFieldRelativeSpeeds(speeds, getEstimatedPose().getRotation()));
-        SwerveModuleState[] moduleStates = kinematics.toSwerveModuleStates(speeds);
+    }
+
+    // public void PPDrive(ChassisSpeeds speeds) {
+    //     if (Math.abs(speeds.vxMetersPerSecond) < Config.AutonomousConstants.lowestVelocity && Math.abs(speeds.vyMetersPerSecond) < Config.AutonomousConstants.lowestVelocity && Math.abs(speeds.omegaRadiansPerSecond) < Config.AutonomousConstants.lowestAngularVelocity) {
+    //         stationary();
+    //     }
+    //     // speeds.vxMetersPerSecond = -speeds.vxMetersPerSecond;
+    //     // speeds.vyMetersPerSecond = -speeds.vyMetersPerSecond;
+    //     //speeds.omegaRadiansPerSecond = -speeds.omegaRadiansPerSecond; // not sure if this is totally necessary
+    //     //SwerveModuleState[] moduleStates = kinematics.toSwerveModuleStates(ChassisSpeeds.fromFieldRelativeSpeeds(speeds, getEstimatedPose().getRotation()));
+    //     SwerveModuleState[] moduleStates = kinematics.toSwerveModuleStates(speeds);
+    //     SwerveDriveKinematics.desaturateWheelSpeeds(moduleStates, Config.AutonomousConstants.maxVelocity);
+    //     frontLeftModule.setState(moduleStates[0]);
+    //     frontRightModule.setState(moduleStates[1]);
+    //     rearLeftModule.setState(moduleStates[2]);
+    //     rearRightModule.setState(moduleStates[3]);
+    // }
+
+    public void PPSetStates(SwerveModuleState[] moduleStates) {
         SwerveDriveKinematics.desaturateWheelSpeeds(moduleStates, Config.AutonomousConstants.maxVelocity);
         frontLeftModule.setState(moduleStates[0]);
         frontRightModule.setState(moduleStates[1]);

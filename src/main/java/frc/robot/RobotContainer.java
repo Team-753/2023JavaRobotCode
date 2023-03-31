@@ -15,12 +15,15 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.Drive.DriveTrain;
 import frc.robot.subsystems.Mandible;
 import frc.robot.subsystems.StreamDeck;
 import frc.robot.commands.ArmConfirmPositionCommand;
+import frc.robot.commands.ArmManualControlCommand;
+import frc.robot.commands.ConsistentChargeStationAuto;
 import frc.robot.commands.DefaultDriveCommand;
 import frc.robot.commands.DriveInDirectionCommand;
 import frc.robot.commands.MandibleOuttakeCommand;
@@ -34,7 +37,7 @@ import frc.robot.commands.AutonomousPlacement.MandiblePlacementCommand;
 import frc.robot.commands.AutonomousPlacement.MoveToPlacementCommand;
 import frc.robot.subsystems.Arm;
 
-import java.io.File;
+//import java.io.File;
 import java.util.HashMap;
 
 import com.pathplanner.lib.PathConstraints;
@@ -52,7 +55,7 @@ public class RobotContainer {
   private HashMap<String, Command> eventMap;
   private CommandJoystick joystick;
   private CommandXboxController xboxController;
-  private String[] pathnames;
+//  private String[] pathnames;
   public SendableChooser<String> autoChooser = new SendableChooser<>();
   SendableChooser<Integer> secondPiecePlacementChooser = new SendableChooser<>();
   private PathConstraints autoPathConstraints;
@@ -76,19 +79,24 @@ public class RobotContainer {
 
     // set default command
     driveTrain.setDefaultCommand(new DefaultDriveCommand(joystick, driveTrain));
+    arm.setDefaultCommand(new ArmManualControlCommand(arm, xboxController));
     // mandible default command is set internally
     // arm doesn't have a default command, is triggerd on a given stick input
 
     autoPathConstraints = new PathConstraints(Config.AutonomousConstants.maxVelocity, Config.AutonomousConstants.maxAccel);
     // we need this for on the fly generation w/ no eventmap and no alliance color 
     generateEventMap();
-    swerveAutoBuilder = new SwerveAutoBuilder(driveTrain::getEstimatedPose, driveTrain::resetPose, new PIDConstants(Config.AutonomousConstants.translationKP, Config.AutonomousConstants.translationKI, Config.AutonomousConstants.translationKD), new PIDConstants(Config.AutonomousConstants.rotationKP, Config.AutonomousConstants.rotationKI, Config.AutonomousConstants.rotationKD), driveTrain::PPDrive, eventMap, true, driveTrain);
+    //swerveAutoBuilder = new SwerveAutoBuilder(driveTrain::getEstimatedPose, driveTrain::resetPose, new PIDConstants(Config.AutonomousConstants.translationKP, Config.AutonomousConstants.translationKI, Config.AutonomousConstants.translationKD), new PIDConstants(Config.AutonomousConstants.rotationKP, Config.AutonomousConstants.rotationKI, Config.AutonomousConstants.rotationKD), driveTrain::PPDrive, eventMap, true, driveTrain);
+    swerveAutoBuilder = new SwerveAutoBuilder(driveTrain::getEstimatedPose, driveTrain::resetPose, driveTrain.kinematics, new PIDConstants(Config.AutonomousConstants.translationKP, Config.AutonomousConstants.translationKI, Config.AutonomousConstants.translationKD), new PIDConstants(Config.AutonomousConstants.rotationKP, Config.AutonomousConstants.rotationKI, Config.AutonomousConstants.rotationKD), driveTrain::PPSetStates, eventMap, true, driveTrain);
     configureBindings();
 
     // setting our autos
     autoChooser.setDefaultOption("Place Cube", "Place Cube");
-    autoChooser.addOption("Charge", "Charge");
-    autoChooser.addOption("Cable Protector 2 Piece", "Cable Protector 2 Piece");
+    autoChooser.addOption("Place & Charge", "Place & Charge");
+    autoChooser.addOption("Cable 2 Piece", "Cable 2 Piece");
+    autoChooser.addOption("Open 2 Piece", "Open 2 Piece");
+    autoChooser.addOption("Cable Taxi", "Cable Taxi");
+    autoChooser.addOption("Open Taxi", "Open Taxi");
     // Grabbing the auto path names as to automatically populate our dashboard
     // File f = new File(System.getProperty("user.dir") + "/src/main/deploy/pathplanner");
     // pathnames = f.list();
@@ -109,14 +117,7 @@ public class RobotContainer {
     // if (Config.DEBUGGING.useDebugTab) {
     //   ShuffleboardTab debuggingTab = Shuffleboard.getTab("DEBUGGING");
     // }
-  }
-
-  private double getStickRemainder(double input) {
-    double adjsutedInput = (Math.abs(input) - Config.ArmConstants.manualControlDeadzone) / (1 - Config.ArmConstants.manualControlDeadzone);
-    if (input < 1) {
-      adjsutedInput = -adjsutedInput;
-    }
-    return adjsutedInput;
+    SmartDashboard.putData("Drive to placement", new MoveToPlacementCommand(driveTrain, streamDeck));
   }
 
   private void configureBindings() {
@@ -142,14 +143,14 @@ public class RobotContainer {
       new ParallelRaceGroup(
         Commands.run(() -> mandible.intakeWheels(), mandible), // spinning the intake in
         new DriveUntilOnPieceCommand(driveTrain)), // driving straight forward until we pass over the piece
-        Commands.run(() -> mandible.passiveIntake()), // stop intaking
+        Commands.runOnce(() -> mandible.passiveIntake()), // stop intaking
       new SetArmPositionCommand(arm, "Optimized")));
 
     Trigger joystickTwo = joystick.button(2);
     joystickTwo.whileTrue(new SequentialCommandGroup(
       new CalculateArmPositionCommand(arm, streamDeck, false),
       new MoveToPlacementCommand(driveTrain, streamDeck),
-      new DriverConfirmCommand(joystick, driveTrain),
+      new DriverConfirmCommand(joystick, driveTrain, mandible),
       new CalculateArmPositionCommand(arm, streamDeck, true),
       new MandiblePlacementCommand(mandible),
       new SetArmPositionCommand(arm, "Optimized")
@@ -159,8 +160,6 @@ public class RobotContainer {
     xboxController.b().onTrue(Commands.runOnce(() -> mandible.setOpen(true), mandible));
     xboxController.a().whileTrue(mandible.toggleIntakeInCommand);
     xboxController.y().whileTrue(mandible.toggleIntakeOutCommand);
-    xboxController.axisGreaterThan(1, Config.ArmConstants.manualControlDeadzone).whileTrue(Commands.run(()-> arm.manualControl(getStickRemainder(xboxController.getLeftY()), xboxController.getHID().getRightBumper()), arm));
-    xboxController.axisLessThan(1, -Config.ArmConstants.manualControlDeadzone).whileTrue(Commands.run(()-> arm.manualControl(getStickRemainder(xboxController.getLeftY()), xboxController.getHID().getRightBumper()), arm));
   }
 
   public Command getAutonomousCommand() {
@@ -168,11 +167,16 @@ public class RobotContainer {
     String autoName = autoChooser.getSelected();
     Command command;
     switch (autoName) {
-      case "Charge":
-        command = new SequentialCommandGroup();
-        break;
       case "Place Cube":
         command = eventMap.get("Place Cube");
+        break;
+      case "Place & Charge":
+        command = new SequentialCommandGroup(
+          eventMap.get("Place Cube"),
+          new ConsistentChargeStationAuto(driveTrain, arm, false),
+          new WaitCommand(0.5),
+          new ConsistentChargeStationAuto(driveTrain, arm, true)
+        );
         break;
       default:
         command = swerveAutoBuilder.fullAuto(PathPlanner.loadPathGroup(autoName, autoPathConstraints));
@@ -186,9 +190,9 @@ public class RobotContainer {
       new ArmConfirmPositionCommand(arm, "HighCube"), 
       new MandibleOuttakeCommand(mandible), 
       new SetArmPositionCommand(arm, "Optimized")));
-    eventMap.put("Mandible In", mandible.toggleIntakeInCommand);
-    eventMap.put("Mandible Out", mandible.toggleIntakeOutCommand);
-    eventMap.put("Mandible Off", mandible.toggleIntakeOffCommand);
+    eventMap.put("Mandible In", Commands.run(() -> mandible.intakeWheels()));
+    eventMap.put("Mandible Out", Commands.run(() -> mandible.outtakeWheels()));
+    eventMap.put("Mandible Off", Commands.run(() -> mandible.passiveIntake()));
     eventMap.put("Open Mandible", Commands.runOnce(() -> mandible.setOpen(true), mandible));
     eventMap.put("Close Mandible", Commands.runOnce(() -> mandible.setOpen(false), mandible));
     eventMap.put("Pickup Piece", new SequentialCommandGroup(
@@ -199,7 +203,7 @@ public class RobotContainer {
       new ParallelRaceGroup(
         Commands.run(() -> mandible.intakeWheels(), mandible), // spinning the intake in
         new DriveUntilOnPieceCommand(driveTrain)), // driving straight forward until we pass over the piece
-        Commands.run(() -> mandible.passiveIntake()), // stop intaking
+        Commands.runOnce(() -> mandible.passiveIntake()), // stop intaking
       new SetArmPositionCommand(arm, "Optimized"))); // setting the arm back up
     eventMap.put("Place Piece", new SequentialCommandGroup(
       new CalculateArmPositionCommand(arm, secondPiecePlacementChooser, false),
@@ -209,6 +213,7 @@ public class RobotContainer {
       new SetArmPositionCommand(arm, "Optimized")
     ));
     eventMap.put("ArmFloorPickupPrep", new SetArmPositionCommand(arm, "FloorPickupPrep"));
+    eventMap.put("ArmOptimized", new SetArmPositionCommand(arm, "Optimized"));
   }
 
   public void disabledPeriodic() {

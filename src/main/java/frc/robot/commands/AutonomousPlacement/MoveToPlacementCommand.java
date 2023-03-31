@@ -18,6 +18,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.wpilibj.Timer;
 import com.pathplanner.lib.auto.PIDConstants;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -29,6 +30,7 @@ public class MoveToPlacementCommand extends CommandBase {
     private DriveTrain driveTrain;
     private SendableChooser<Integer> secondPieceChooser;
     private StreamDeck streamDeck;
+    private SwerveDriveKinematics kinematics;
     boolean isAuto;
 
     public MoveToPlacementCommand(DriveTrain kDriveTrain, SendableChooser<Integer> kSecondPieceChooser) { // this one is for autonomous
@@ -36,6 +38,7 @@ public class MoveToPlacementCommand extends CommandBase {
         secondPieceChooser = kSecondPieceChooser;
         controller = new PPHolonomicDriveController(pidControllerFromConstants(Config.AutonomousConstants.translationConstants), pidControllerFromConstants(Config.AutonomousConstants.translationConstants), pidControllerFromConstants(Config.AutonomousConstants.rotationConstants));
         isAuto = true;
+        kinematics = driveTrain.kinematics;
     }
 
     public MoveToPlacementCommand(DriveTrain kDriveTrain, StreamDeck kStreamDeck) { // this one is for teleoperated auto placement
@@ -43,6 +46,7 @@ public class MoveToPlacementCommand extends CommandBase {
         streamDeck = kStreamDeck;
         controller = new PPHolonomicDriveController(pidControllerFromConstants(Config.AutonomousConstants.translationConstants), pidControllerFromConstants(Config.AutonomousConstants.translationConstants), pidControllerFromConstants(Config.AutonomousConstants.rotationConstants));
         isAuto = false;
+        kinematics = driveTrain.kinematics;
     }
 
     private PathPlannerTrajectory getTrajectory() {
@@ -99,7 +103,9 @@ public class MoveToPlacementCommand extends CommandBase {
         }
         Pose2d targetPose2d = new Pose2d(new Translation2d(x + offset, y), Rotation2d.fromRadians(Math.PI));
         SmartDashboard.putString("Target Pose", String.format("X: %f, Y: %f, Z: %f", targetPose2d.getX(), targetPose2d.getY(), targetPose2d.getRotation().getDegrees()));
-        return PathPlanner.generatePath(Config.AutonomousConstants.onTheFlyConstraints, PathPoint.fromCurrentHolonomicState(currentPose, driveTrain.actualChassisSpeeds()), new PathPoint(targetPose2d.getTranslation(), Rotation2d.fromRadians(Math.PI), targetPose2d.getRotation()));
+        Rotation2d heading = new Rotation2d(targetPose2d.getX() - currentPose.getX(), targetPose2d.getY() - currentPose.getY());
+        //PathPoint.fromCurrentHolonomicState(currentPose, driveTrain.actualChassisSpeeds())
+        return PathPlanner.generatePath(Config.AutonomousConstants.onTheFlyConstraints, new PathPoint(currentPose.getTranslation(), heading, currentPose.getRotation()), new PathPoint(targetPose2d.getTranslation(), heading, targetPose2d.getRotation()));
     }
 
     @Override
@@ -123,7 +129,7 @@ public class MoveToPlacementCommand extends CommandBase {
           currentPose);
   
       ChassisSpeeds targetChassisSpeeds = this.controller.calculate(currentPose, desiredState);
-      driveTrain.PPDrive(targetChassisSpeeds);
+      driveTrain.PPSetStates(kinematics.toSwerveModuleStates(targetChassisSpeeds));
     }
   
     @Override

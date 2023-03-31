@@ -104,9 +104,10 @@ public class Config {
         }
     }
     public static class DEBUGGING {
-        public static boolean useDebugTab = true;
-        public static boolean reportSwervePositions = true;
-        public static boolean reportChassisSpeeds = true;
+        public static boolean useDebugTab = false;
+        public static boolean reportSwervePositions = false;
+        public static boolean reportChassisSpeeds = false;
+        public static boolean bypassAutoChecks = false; // VERY DANGEROUS TO LEAVE TRUE
     }
 
     public static class AutonomousConstants {
@@ -121,7 +122,11 @@ public class Config {
         public static double rotationKI = 0;
         public static double rotationKD = 0;
         public static boolean usePPServer = true;
-        public static PathConstraints onTheFlyConstraints = new PathConstraints(1, 2);
+        public static boolean usePoseReset = false;
+        public static double chargeInitialSpeed = 2.25;
+        public static double chargeFinalSpeed = 0.5;
+        public static double chargeDAngleThreshold = -17.5;
+        public static PathConstraints onTheFlyConstraints = new PathConstraints(2, 2);
         public static PIDConstants translationConstants = new PIDConstants(translationKP, translationKI, translationKD);
         public static PIDConstants rotationConstants = new PIDConstants(rotationKP, rotationKI, rotationKD);
     }

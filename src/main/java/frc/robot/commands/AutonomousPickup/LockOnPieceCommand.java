@@ -14,7 +14,6 @@ public class LockOnPieceCommand extends CommandBase {
     private Mandible mandible;
     private TrapezoidProfile.State targetState = new TrapezoidProfile.State(0, 0); // in radians
     private ProfiledPIDController angleController;
-    private NetworkTableInstance table;
     
     public LockOnPieceCommand(DriveTrain kDriveTrain, Mandible kMandible) {
         driveTrain = kDriveTrain;
@@ -23,7 +22,6 @@ public class LockOnPieceCommand extends CommandBase {
         angleController.setTolerance(Config.DriveConstants.AutoPiecePickup.turnCommandAngleTolerance, Config.DriveConstants.AutoPiecePickup.turnCommandVelocityTolerance);
         angleController.enableContinuousInput(-Math.PI, Math.PI);
         addRequirements(driveTrain, mandible);
-        table = NetworkTableInstance.create();
     }
 
     @Override
@@ -64,7 +62,7 @@ public class LockOnPieceCommand extends CommandBase {
 
     @Override
     public boolean isFinished() {
-        return angleController.atGoal();
+        return angleController.atGoal() || Config.DEBUGGING.bypassAutoChecks;
     }
 
     

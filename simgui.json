@@ -13,6 +13,7 @@
       "/FMSInfo": "FMSInfo",
       "/SmartDashboard/Auto Piece Chooser": "String Chooser",
       "/SmartDashboard/Autonomous Chooser": "String Chooser",
+      "/SmartDashboard/Drive to placement": "Command",
       "/SmartDashboard/Field": "Field2d"
     }
   }
