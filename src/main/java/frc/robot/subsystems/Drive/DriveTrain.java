@@ -21,7 +21,20 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.math.Vector;
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.apriltag.AprilTagFieldLayout.OriginPosition;
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.wpilibj.DriverStation;
+
+import java.io.IOException;
+
+import org.photonvision.EstimatedRobotPose;
+import org.photonvision.PhotonCamera;
+import org.photonvision.PhotonPoseEstimator;
+import org.photonvision.PhotonPoseEstimator.PoseStrategy;
+import org.photonvision.targeting.PhotonTrackedTarget;
+
 import com.kauailabs.navx.frc.AHRS;
 
 public class DriveTrain extends SubsystemBase {
@@ -49,19 +62,22 @@ public class DriveTrain extends SubsystemBase {
     private double xVelocity = 0;
     private double yVelocity = 0;
     private double zVelocity = 0;
+    private PhotonCamera photonCamera;
+    private AprilTagFieldLayout fieldLayout;
+    private PhotonPoseEstimator photonPoseEstimator;
 
     public DriveTrain() {
         SmartDashboard.putBoolean("isRedAlliance", false);
         navxAHRS = new AHRS();
-        frontLeftModule = new SwerveModule(frc.robot.Config.DimensionalConstants.SwerveModuleConfigurations.get("frontLeftModule"));
-        frontRightModule = new SwerveModule(frc.robot.Config.DimensionalConstants.SwerveModuleConfigurations.get("frontRightModule"));
-        rearLeftModule = new SwerveModule(frc.robot.Config.DimensionalConstants.SwerveModuleConfigurations.get("rearLeftModule"));
-        rearRightModule = new SwerveModule(frc.robot.Config.DimensionalConstants.SwerveModuleConfigurations.get("rearRightModule"));
+        frontLeftModule = new SwerveModule(Config.DimensionalConstants.SwerveModuleConfigurations.get("frontLeftModule"));
+        frontRightModule = new SwerveModule(Config.DimensionalConstants.SwerveModuleConfigurations.get("frontRightModule"));
+        rearLeftModule = new SwerveModule(Config.DimensionalConstants.SwerveModuleConfigurations.get("rearLeftModule"));
+        rearRightModule = new SwerveModule(Config.DimensionalConstants.SwerveModuleConfigurations.get("rearRightModule"));
         kinematics = new SwerveDriveKinematics(
-            new Translation2d(frc.robot.Config.DimensionalConstants.trackWidth / 2, frc.robot.Config.DimensionalConstants.wheelBase / 2), // front left module
-            new Translation2d(frc.robot.Config.DimensionalConstants.trackWidth / 2, -frc.robot.Config.DimensionalConstants.wheelBase / 2), // front right module
-            new Translation2d(-frc.robot.Config.DimensionalConstants.trackWidth / 2, frc.robot.Config.DimensionalConstants.wheelBase / 2), // rear left module
-            new Translation2d(-frc.robot.Config.DimensionalConstants.trackWidth / 2, -frc.robot.Config.DimensionalConstants.wheelBase / 2) // rear right module
+            new Translation2d(Config.DimensionalConstants.trackWidth / 2, Config.DimensionalConstants.wheelBase / 2), // front left module
+            new Translation2d(Config.DimensionalConstants.trackWidth / 2, -Config.DimensionalConstants.wheelBase / 2), // front right module
+            new Translation2d(-Config.DimensionalConstants.trackWidth / 2, Config.DimensionalConstants.wheelBase / 2), // rear left module
+            new Translation2d(-Config.DimensionalConstants.trackWidth / 2, -Config.DimensionalConstants.wheelBase / 2) // rear right module
             ); 
         poseEstimator = new SwerveDrivePoseEstimator(kinematics, navxAHRS.getRotation2d(), getSwerveModulePositions(), new Pose2d(0, 0, Rotation2d.fromRadians(Math.PI)), stateStdDevs, visionMeasurementStdDevs);
         enableSpeedLimiterCommand = runOnce(() -> enableSpeedLimiter());
@@ -69,6 +85,18 @@ public class DriveTrain extends SubsystemBase {
         goXModeCommand = run(() -> goXMode());
         tiltTimer.start();
         SmartDashboard.putData("Field", kField2d);
+        if (Config.AutonomousConstants.usePhotonCamera) {
+            photonCamera = new PhotonCamera(Config.AutonomousConstants.photonCameraName);
+            try {
+                fieldLayout = AprilTagFields.k2023ChargedUp.loadAprilTagLayoutField();
+                fieldLayout.setOrigin(OriginPosition.kBlueAllianceWallRightSide);
+                photonPoseEstimator = new PhotonPoseEstimator(fieldLayout, PoseStrategy.MULTI_TAG_PNP, photonCamera, Config.AutonomousConstants.cameraTransformation);
+                photonPoseEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
+            } catch (IOException e) {
+                DriverStation.reportError("Failed to load AprilTagFieldLayout", e.getStackTrace());
+                photonPoseEstimator = null;
+            }
+        }
         if (Config.DEBUGGING.useDebugTab) {
             debuggingTab = Shuffleboard.getTab("DEBUGGING");
             if (Config.DEBUGGING.reportChassisSpeeds) {
@@ -107,17 +135,34 @@ public class DriveTrain extends SubsystemBase {
     @Override
     public void periodic() {
         super.periodic();
-        if (LimelightHelper.getCurrentPipelineIndex(Config.DimensionalConstants.limelightName) == 0.0 && LimelightHelper.getTV(Config.DimensionalConstants.limelightName)) {
-            Pose3d poseToTag = LimelightHelper.getCameraPose3d_TargetSpace(Config.DimensionalConstants.limelightName);
-            Translation2d translation = poseToTag.toPose2d().getTranslation();
-            double distance = Math.hypot(translation.getX(), translation.getY());
-            SmartDashboard.putNumber("Tag Distance", distance);
-            if (distance <= Config.DimensionalConstants.apriltagThresholdDistance) {
-                if (isRedAlliance) {
-                    poseEstimator.addVisionMeasurement(LimelightHelper.getBotPose2d_wpiRed(Config.DimensionalConstants.limelightName), LimelightHelper.getLatency_Capture(Config.DimensionalConstants.limelightName) + LimelightHelper.getLatency_Pipeline(Config.DimensionalConstants.limelightName));
+        if (Config.AutonomousConstants.useLLForPoseEstimation) {
+            if (LimelightHelper.getCurrentPipelineIndex(Config.DimensionalConstants.limelightName) == 0.0 && LimelightHelper.getTV(Config.DimensionalConstants.limelightName)) {
+                Pose3d poseToTag = LimelightHelper.getCameraPose3d_TargetSpace(Config.DimensionalConstants.limelightName);
+                Translation2d translation = poseToTag.toPose2d().getTranslation();
+                double distance = Math.hypot(translation.getX(), translation.getY());
+                SmartDashboard.putNumber("Tag Distance", distance);
+                if (distance <= Config.DimensionalConstants.apriltagThresholdDistance) {
+                    if (isRedAlliance) {
+                        poseEstimator.addVisionMeasurement(LimelightHelper.getBotPose2d_wpiRed(Config.DimensionalConstants.limelightName), LimelightHelper.getLatency_Capture(Config.DimensionalConstants.limelightName) + LimelightHelper.getLatency_Pipeline(Config.DimensionalConstants.limelightName));
+                    }
+                    else {
+                        poseEstimator.addVisionMeasurement(LimelightHelper.getBotPose2d_wpiBlue(Config.DimensionalConstants.limelightName), LimelightHelper.getLatency_Capture(Config.DimensionalConstants.limelightName) + LimelightHelper.getLatency_Pipeline(Config.DimensionalConstants.limelightName));
+                    }
                 }
-                else {
-                    poseEstimator.addVisionMeasurement(LimelightHelper.getBotPose2d_wpiBlue(Config.DimensionalConstants.limelightName), LimelightHelper.getLatency_Capture(Config.DimensionalConstants.limelightName) + LimelightHelper.getLatency_Pipeline(Config.DimensionalConstants.limelightName));
+            }
+        }
+        if (photonPoseEstimator != null) {
+            EstimatedRobotPose estimation = photonPoseEstimator.update().get();
+            if (estimation != null) {  
+                if (estimation.targetsUsed.size() > 1) { // using multi-tag pnp, it is probably trustworthy
+                    poseEstimator.addVisionMeasurement(estimation.estimatedPose.toPose2d(), estimation.timestampSeconds);
+                }
+                else { // only one tag is visible, we should only trust it if we are under the threshold distance
+                    PhotonTrackedTarget target = estimation.targetsUsed.get(0);
+                    double camToTarget = target.getBestCameraToTarget().getTranslation().toTranslation2d().getNorm();
+                    if (target.getPoseAmbiguity() < 0.10 && camToTarget < Config.DimensionalConstants.apriltagThresholdDistance) {
+                        poseEstimator.addVisionMeasurement(estimation.estimatedPose.toPose2d(), estimation.timestampSeconds);
+                    }
                 }
             }
         }
@@ -164,10 +209,18 @@ public class DriveTrain extends SubsystemBase {
         if (kIsRedAlliance) {
             isRedAlliance = true;
             SmartDashboard.putBoolean("isRedAlliance", kIsRedAlliance);
+            if (photonPoseEstimator != null) {
+                fieldLayout.setOrigin(OriginPosition.kRedAllianceWallRightSide);
+                photonPoseEstimator.setFieldTags(fieldLayout);
+            }
         }
         else {
             isRedAlliance = false;
             SmartDashboard.putBoolean("isRedAlliance", kIsRedAlliance);
+            if (photonPoseEstimator != null) {
+                fieldLayout.setOrigin(OriginPosition.kBlueAllianceWallRightSide);
+                photonPoseEstimator.setFieldTags(fieldLayout);
+            }
         }
     }
 

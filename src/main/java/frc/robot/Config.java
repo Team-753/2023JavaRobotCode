@@ -5,6 +5,9 @@ import java.util.HashMap;
 import com.pathplanner.lib.PathConstraints;
 import com.pathplanner.lib.auto.PIDConstants;
 
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import frc.robot.subsystems.Drive.SwerveModuleConfig;
 
@@ -21,7 +24,7 @@ public class Config {
         }
         public static String limelightName = "limelight";
         public static int pcmID = 61;
-        public static double apriltagThresholdDistance = 4;
+        public static double apriltagThresholdDistance = 2;
         public static double fieldHeight = 8.0137;
         public static double fieldLength = 16.54175;
         public static double[][][] gridLayout = {
@@ -123,6 +126,10 @@ public class Config {
         public static double rotationKD = 0;
         public static boolean usePPServer = true;
         public static boolean usePoseReset = false;
+        public static boolean usePhotonCamera = false;
+        public static boolean useLLForPoseEstimation = true;
+        public static String photonCameraName = "photoncameraone";
+        public static Transform3d cameraTransformation = new Transform3d(new Translation3d(-0.36195, 0.0, -0.5969), new Rotation3d());
         public static double chargeInitialSpeed = 2.25;
         public static double chargeFinalSpeed = 0.5;
         public static double chargeDAngleThreshold = -17.5;
