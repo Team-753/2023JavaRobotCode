@@ -13,7 +13,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
@@ -25,9 +24,10 @@ import frc.robot.commands.ArmConfirmPositionCommand;
 import frc.robot.commands.ArmManualControlCommand;
 import frc.robot.commands.ConsistentChargeStationAuto;
 import frc.robot.commands.DefaultDriveCommand;
-import frc.robot.commands.DriveInDirectionCommand;
+// import frc.robot.commands.DriveInDirectionCommand;
 import frc.robot.commands.MandibleOuttakeCommand;
 import frc.robot.commands.SetArmPositionCommand;
+import frc.robot.commands.SubstationPickupCommand;
 import frc.robot.commands.AutonomousPickup.DriveUntilOnPieceCommand;
 import frc.robot.commands.AutonomousPickup.LockOnPieceCommand;
 import frc.robot.commands.AutonomousPickup.TurnToPieceCommand;
@@ -131,8 +131,8 @@ public class RobotContainer {
     Trigger joystickEleven = joystick.button(11);
     joystickEleven.whileTrue(Commands.runOnce(() -> driveTrain.resetPose(new Pose2d()), driveTrain));
 
-    Trigger joystickTen = joystick.button(10);
-    joystickTen.whileTrue(new DriveInDirectionCommand(driveTrain, 1, 0, 0, false));
+    // Trigger joystickTen = joystick.button(10);
+    // joystickTen.whileTrue(new DriveInDirectionCommand(driveTrain, 1, 0, 0, false));
 
     Trigger joystickNine = joystick.button(9);
     joystickNine.whileTrue(new SequentialCommandGroup(
@@ -140,10 +140,7 @@ public class RobotContainer {
       new TurnToPieceCommand(driveTrain), // turning to the expected angle of the game piece
       new LockOnPieceCommand(driveTrain, mandible), // doing the final correction using the limelight google coral pipeline
       new ArmConfirmPositionCommand(arm, "Floor"), // moving the arm into pickup position
-      new ParallelRaceGroup(
-        Commands.run(() -> mandible.intakeWheels(), mandible), // spinning the intake in
-        new DriveUntilOnPieceCommand(driveTrain)), // driving straight forward until we pass over the piece
-        Commands.runOnce(() -> mandible.passiveIntake()), // stop intaking
+      new DriveUntilOnPieceCommand(driveTrain, mandible),
       new SetArmPositionCommand(arm, "Optimized")));
 
     Trigger joystickTwo = joystick.button(2);
@@ -156,10 +153,18 @@ public class RobotContainer {
       new SetArmPositionCommand(arm, "Optimized")
     ));
 
+    Trigger joystickThree = joystick.button(3);
+    joystickThree.whileTrue(new SubstationPickupCommand(driveTrain, joystick));
+
     xboxController.x().onTrue(Commands.runOnce(() -> mandible.setOpen(false), mandible));
     xboxController.b().onTrue(Commands.runOnce(() -> mandible.setOpen(true), mandible));
     xboxController.a().whileTrue(mandible.toggleIntakeInCommand);
     xboxController.y().whileTrue(mandible.toggleIntakeOutCommand);
+
+    xboxController.pov(0).onTrue(new SetArmPositionCommand(arm, "Optimized"));
+    xboxController.pov(90).onTrue(new SetArmPositionCommand(arm, "Substation"));
+    xboxController.pov(180).onTrue(new SetArmPositionCommand(arm, "Floor"));
+    xboxController.pov(270).onTrue(new SetArmPositionCommand(arm, "FullyRetracted"));
   }
 
   public Command getAutonomousCommand() {
@@ -196,15 +201,12 @@ public class RobotContainer {
     eventMap.put("Open Mandible", Commands.runOnce(() -> mandible.setOpen(true), mandible));
     eventMap.put("Close Mandible", Commands.runOnce(() -> mandible.setOpen(false), mandible));
     eventMap.put("Pickup Piece", new SequentialCommandGroup(
-      new SetArmPositionCommand(arm, "FloorPickupPrep"), // getting the arm into position
+      // new SetArmPositionCommand(arm, "FloorPickupPrep"), // getting the arm into position
       new TurnToPieceCommand(driveTrain), // turning to the expected angle of the game piece
       new LockOnPieceCommand(driveTrain, mandible), // doing the final correction using the limelight google coral pipeline
       new ArmConfirmPositionCommand(arm, "Floor"), // moving the arm into pickup position
-      new ParallelRaceGroup(
-        Commands.run(() -> mandible.intakeWheels(), mandible), // spinning the intake in
-        new DriveUntilOnPieceCommand(driveTrain)), // driving straight forward until we pass over the piece
-        Commands.runOnce(() -> mandible.passiveIntake()), // stop intaking
-      new SetArmPositionCommand(arm, "Optimized"))); // setting the arm back up
+      new DriveUntilOnPieceCommand(driveTrain, mandible),
+      new SetArmPositionCommand(arm, "Optimized")));
     eventMap.put("Place Piece", new SequentialCommandGroup(
       new CalculateArmPositionCommand(arm, secondPiecePlacementChooser, false),
       new MoveToPlacementCommand(driveTrain, secondPiecePlacementChooser),

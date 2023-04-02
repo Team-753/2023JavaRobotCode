@@ -11,7 +11,9 @@ import frc.robot.Config;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.VictorSPXControlMode;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
+import com.playingwithfusion.TimeOfFlight;
 //import com.kauailabs.navx.frc.AHRS;
+import com.playingwithfusion.TimeOfFlight.RangingMode;
 
 
 public class Mandible extends SubsystemBase {
@@ -20,6 +22,7 @@ public class Mandible extends SubsystemBase {
     private Compressor compressor;
     private VictorSPX leftMotor;
     private VictorSPX rightMotor;
+    public TimeOfFlight distanceSensor;
     public Command toggleIntakeInCommand;
     public Command toggleIntakeOffCommand;
     public Command toggleIntakeOutCommand;
@@ -37,6 +40,10 @@ public class Mandible extends SubsystemBase {
         toggleIntakeInCommand = run(() -> intakeWheels());
         toggleIntakeOffCommand = runOnce(() -> passiveIntake());
         toggleIntakeOutCommand = run(() -> outtakeWheels());
+        if (Config.MandibleConstants.useDistanceSensor) {
+            distanceSensor = new TimeOfFlight(Config.MandibleConstants.distanceSensorID);
+            distanceSensor.setRangingMode(RangingMode.Short, 24);
+        }
     }
 
     public void passiveIntake() {

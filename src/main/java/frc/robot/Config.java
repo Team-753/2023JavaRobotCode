@@ -146,6 +146,9 @@ public class Config {
         public static double intakeSpeed = 0.50;
         public static double idleSpeed = 0.20;
         public static double defaultOuttakeTime = 0.50;
+        public static boolean useDistanceSensor = true;
+        public static int distanceSensorID = 12;
+        public static double distanceRangeThreshold = 40; // 40 millimeters
     }
     public static class ArmConstants {
         public static double armIncrement = 0.5;

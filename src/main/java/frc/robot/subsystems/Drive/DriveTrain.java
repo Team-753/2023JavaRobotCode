@@ -273,11 +273,24 @@ public class DriveTrain extends SubsystemBase {
         double xVel = outputs[1] * Config.TeleoperatedConstants.maxVelocity * speedLimitingFactor;
         double yVel = outputs[0] * Config.TeleoperatedConstants.maxVelocity * speedLimitingFactor;
         double zVel = outputs[2] * Config.TeleoperatedConstants.maxAngularVelocity * Config.TeleoperatedConstants.turningSpeedModifier;
-        if (xVel == 0 && yVel == 0 && zVel == 0) {
+        if (xVel == 0.0 && yVel == 0.0 && zVel == 0.0) {
             stationary();
         }
         else {
             setSwerveStates(xVel, yVel, zVel);
+        }
+    }
+
+    public void joystickDriveXYOnly(CommandJoystick joystick, double rotationFeedback) {
+        double[] inputs = {-joystick.getX(), -joystick.getY(), 0.0};
+        double[] outputs = normalizeInputs(inputs);
+        double xVel = outputs[1] * Config.TeleoperatedConstants.maxVelocity * speedLimitingFactor;
+        double yVel = outputs[0] * Config.TeleoperatedConstants.maxVelocity * speedLimitingFactor;
+        if (xVel == 0.0 && yVel == 0.0 && rotationFeedback == 0.0) {
+            stationary();
+        }
+        else {
+            setSwerveStates(xVel, yVel, rotationFeedback);
         }
     }
 
