@@ -28,6 +28,7 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.wpilibj.DriverStation;
 
 import java.io.IOException;
+import java.util.ConcurrentModificationException;
 
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
@@ -136,19 +137,24 @@ public class DriveTrain extends SubsystemBase {
     public void periodic() {
         super.periodic();
         if (Config.AutonomousConstants.useLLForPoseEstimation) {
-            if (LimelightHelper.getCurrentPipelineIndex(Config.DimensionalConstants.limelightName) == 0.0 && LimelightHelper.getTV(Config.DimensionalConstants.limelightName)) {
-                Pose3d poseToTag = LimelightHelper.getCameraPose3d_TargetSpace(Config.DimensionalConstants.limelightName);
-                Translation2d translation = poseToTag.toPose2d().getTranslation();
-                double distance = Math.hypot(translation.getX(), translation.getY());
-                SmartDashboard.putNumber("Tag Distance", distance);
-                if (distance <= Config.DimensionalConstants.apriltagThresholdDistance) {
-                    if (isRedAlliance) {
-                        poseEstimator.addVisionMeasurement(LimelightHelper.getBotPose2d_wpiRed(Config.DimensionalConstants.limelightName), LimelightHelper.getLatency_Capture(Config.DimensionalConstants.limelightName) + LimelightHelper.getLatency_Pipeline(Config.DimensionalConstants.limelightName));
-                    }
-                    else {
-                        poseEstimator.addVisionMeasurement(LimelightHelper.getBotPose2d_wpiBlue(Config.DimensionalConstants.limelightName), LimelightHelper.getLatency_Capture(Config.DimensionalConstants.limelightName) + LimelightHelper.getLatency_Pipeline(Config.DimensionalConstants.limelightName));
+            try {
+                if (LimelightHelper.getCurrentPipelineIndex(Config.DimensionalConstants.limelightName) == 0.0 && LimelightHelper.getTV(Config.DimensionalConstants.limelightName)) {
+                    Pose3d poseToTag = LimelightHelper.getCameraPose3d_TargetSpace(Config.DimensionalConstants.limelightName);
+                    Translation2d translation = poseToTag.toPose2d().getTranslation();
+                    double distance = Math.hypot(translation.getX(), translation.getY());
+                    SmartDashboard.putNumber("Tag Distance", distance);
+                    if (distance <= Config.DimensionalConstants.apriltagThresholdDistance) {
+                        if (isRedAlliance) {
+                            poseEstimator.addVisionMeasurement(LimelightHelper.getBotPose2d_wpiRed(Config.DimensionalConstants.limelightName), LimelightHelper.getLatency_Capture(Config.DimensionalConstants.limelightName) + LimelightHelper.getLatency_Pipeline(Config.DimensionalConstants.limelightName));
+                        }
+                        else {
+                            poseEstimator.addVisionMeasurement(LimelightHelper.getBotPose2d_wpiBlue(Config.DimensionalConstants.limelightName), LimelightHelper.getLatency_Capture(Config.DimensionalConstants.limelightName) + LimelightHelper.getLatency_Pipeline(Config.DimensionalConstants.limelightName));
+                        }
                     }
                 }
+            }
+            catch (ConcurrentModificationException e) {
+                DriverStation.reportError("LL Concurrent Modification Exception", e.getStackTrace());
             }
         }
         if (photonPoseEstimator != null) {

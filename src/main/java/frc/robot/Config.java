@@ -161,7 +161,7 @@ public class Config {
         static {
             armValues.put("FullyRetracted", 0.0);
             armValues.put("Substation", 37.9);
-            armValues.put("Floor", 42.05);
+            armValues.put("Floor", 42.1);
             armValues.put("BottomPlacement", 40.4);
             armValues.put("HighConePrep", 35.2);
             armValues.put("HighConePlacement", 37.16);
