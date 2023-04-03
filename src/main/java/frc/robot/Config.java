@@ -107,10 +107,11 @@ public class Config {
         }
     }
     public static class DEBUGGING {
-        public static boolean useDebugTab = false;
+        public static boolean useDebugTab = true;
         public static boolean reportSwervePositions = false;
         public static boolean reportChassisSpeeds = false;
-        public static boolean bypassAutoChecks = false; // VERY DANGEROUS TO LEAVE TRUE
+        public static boolean bypassAutoChecks = true; // VERY DANGEROUS TO LEAVE TRUE
+        public static boolean ppSpeedDebug = true;
     }
 
     public static class AutonomousConstants {
@@ -125,7 +126,7 @@ public class Config {
         public static double rotationKI = 0;
         public static double rotationKD = 0;
         public static boolean usePPServer = true;
-        public static boolean usePoseReset = false;
+        public static boolean usePoseReset = true;
         public static boolean usePhotonCamera = false;
         public static boolean useLLForPoseEstimation = true;
         public static String photonCameraName = "photoncameraone";
@@ -151,9 +152,10 @@ public class Config {
         public static double distanceRangeThreshold = 40; // 40 millimeters
     }
     public static class ArmConstants {
+        public static boolean useNEO = true;
         public static double armIncrement = 0.5;
         public static double armSlowdownFactor = 0.2;
-        public static int falconID = 9;
+        public static int armID = 9;
         public static int limitSwitchID = 0;
         public static double manualControlDeadzone = 0.1;
         public static double autoPlacementTolerance = 0.1;

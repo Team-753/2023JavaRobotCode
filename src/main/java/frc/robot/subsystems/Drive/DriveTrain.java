@@ -66,6 +66,7 @@ public class DriveTrain extends SubsystemBase {
     private PhotonCamera photonCamera;
     private AprilTagFieldLayout fieldLayout;
     private PhotonPoseEstimator photonPoseEstimator;
+    private double[] ppSpeeds = {0, 0, 0};
 
     public DriveTrain() {
         SmartDashboard.putBoolean("isRedAlliance", false);
@@ -101,20 +102,23 @@ public class DriveTrain extends SubsystemBase {
         if (Config.DEBUGGING.useDebugTab) {
             debuggingTab = Shuffleboard.getTab("DEBUGGING");
             if (Config.DEBUGGING.reportChassisSpeeds) {
-                debuggingTab.addNumber("X Velocity", this::getXVelocity);
-                debuggingTab.addNumber("Y Velocity", this::getYVelocity);
-                debuggingTab.addNumber("Rotation Velocity", this::getZVelocity);
+                debuggingTab.addNumber("vX", this::getXVelocity).withPosition(2, 0);
+                debuggingTab.addNumber("vY", this::getYVelocity).withPosition(3, 0);
+                debuggingTab.addNumber("vO", this::getZVelocity).withPosition(4, 0);
             }
             if (Config.DEBUGGING.reportSwervePositions) {
-                debuggingTab.addNumber("Front Left Module ABS", frontLeftModule::getRawAbsolutePosition);
-                debuggingTab.addNumber("Front Right Module ABS", frontRightModule::getRawAbsolutePosition);
-                debuggingTab.addNumber("Rear Left Module ABS", rearLeftModule::getRawAbsolutePosition);
-                debuggingTab.addNumber("Rear Right Module ABS", rearRightModule::getRawAbsolutePosition);
-                debuggingTab.addNumber("Front Left Module INT", frontLeftModule::getIntegratedPosition);
-                debuggingTab.addNumber("Front Right Module INT", frontRightModule::getIntegratedPosition);
-                debuggingTab.addNumber("Rear Left Module INT", rearLeftModule::getIntegratedPosition);
-                debuggingTab.addNumber("Rear Right Module INT", rearRightModule::getIntegratedPosition);
+                debuggingTab.addNumber("FL ABS", frontLeftModule::getRawAbsolutePosition).withPosition(0, 0);
+                debuggingTab.addNumber("FR ABS", frontRightModule::getRawAbsolutePosition).withPosition(1, 0);
+                debuggingTab.addNumber("RL ABS", rearLeftModule::getRawAbsolutePosition).withPosition(0, 1);
+                debuggingTab.addNumber("RR ABS", rearRightModule::getRawAbsolutePosition).withPosition(1, 1);
+                debuggingTab.addNumber("FL INT", frontLeftModule::getIntegratedPosition).withPosition(0, 2);
+                debuggingTab.addNumber("FR INT", frontRightModule::getIntegratedPosition).withPosition(1, 2);
+                debuggingTab.addNumber("RL INT", rearLeftModule::getIntegratedPosition).withPosition(0, 3);
+                debuggingTab.addNumber("RR INT", rearRightModule::getIntegratedPosition).withPosition(1, 3);
             }
+            // if (Config.DEBUGGING.ppSpeedDebug) {
+            //     debuggingTab.addDoubleArray("Pathplanner Speeds", this::getFormattedPPSpeeds).withPosition(2, 1).withSize(2, 1);
+            // }
           }
     }
 
@@ -127,6 +131,10 @@ public class DriveTrain extends SubsystemBase {
     private double getZVelocity() {
         return zVelocity;
     }
+
+    // private double[] getFormattedPPSpeeds() {
+    //     return ppSpeeds;
+    // }
 
     private SwerveModulePosition[] getSwerveModulePositions() {
         SwerveModulePosition[] positions = {frontLeftModule.getSwerveModulePosition(), frontRightModule.getSwerveModulePosition(), rearLeftModule.getSwerveModulePosition(), rearRightModule.getSwerveModulePosition()};
@@ -370,6 +378,19 @@ public class DriveTrain extends SubsystemBase {
     // }
 
     public void PPSetStates(SwerveModuleState[] moduleStates) {
+        //ChassisSpeeds speeds = kinematics.toChassisSpeeds(moduleStates);
+        // speeds.vxMetersPerSecond = -speeds.vxMetersPerSecond;
+        // speeds.vyMetersPerSecond = -speeds.vyMetersPerSecond;
+        //moduleStates = kinematics.toSwerveModuleStates(speeds);
+        if (Config.DEBUGGING.ppSpeedDebug) {
+            ChassisSpeeds speeds = kinematics.toChassisSpeeds(moduleStates);
+            ppSpeeds[0] = speeds.vxMetersPerSecond;
+            ppSpeeds[1] = speeds.vyMetersPerSecond;
+            ppSpeeds[2] = speeds.omegaRadiansPerSecond;
+            SmartDashboard.putNumber("ppVx", ppSpeeds[0]);
+            SmartDashboard.putNumber("ppVy", ppSpeeds[1]);
+            SmartDashboard.putNumber("ppVO", ppSpeeds[2]);
+        }
         SwerveDriveKinematics.desaturateWheelSpeeds(moduleStates, Config.AutonomousConstants.maxVelocity);
         frontLeftModule.setState(moduleStates[0]);
         frontRightModule.setState(moduleStates[1]);

@@ -33,7 +33,10 @@ public class DriveUntilOnPieceCommand extends CommandBase {
 
     @Override
     public boolean isFinished() {
-        return driveTrain.getEstimatedPose().getX() >= Config.DriveConstants.AutoPiecePickup.gamePieceXValue || Config.DEBUGGING.bypassAutoChecks || (mandible.distanceSensor.isRangeValid() && mandible.distanceSensor.getRange() < Config.MandibleConstants.distanceRangeThreshold); // have we passed over the game piece line yet
+        if (Config.MandibleConstants.useDistanceSensor) {
+            return driveTrain.getEstimatedPose().getX() >= Config.DriveConstants.AutoPiecePickup.gamePieceXValue || Config.DEBUGGING.bypassAutoChecks || (mandible.distanceSensor.isRangeValid() && mandible.distanceSensor.getRange() < Config.MandibleConstants.distanceRangeThreshold); // have we passed over the game piece line yet
+        }
+        return driveTrain.getEstimatedPose().getX() >= Config.DriveConstants.AutoPiecePickup.gamePieceXValue || Config.DEBUGGING.bypassAutoChecks;
     }
 
 }
