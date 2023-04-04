@@ -42,7 +42,7 @@ public class TurnToPieceCommand extends CommandBase {
 
     @Override
     public boolean isFinished() {
-        return angleController.atGoal() || Config.DEBUGGING.bypassAutoChecks;
+        return angleController.atGoal() || Config.DEBUGGING.bypassAutoChecks || Config.DEBUGGING.bypassAutoTurnTo;
     }
 
     private Rotation2d getNearestPieceAngle() {

@@ -75,10 +75,10 @@ public class Config {
     }
     public static class DriveConstants {
         public static Constraints turnControllerConstraints = new Constraints(TeleoperatedConstants.maxAngularVelocity, TeleoperatedConstants.maxAngularVelocity * 2);
-        public static double turnCommandP = 2; //
-        public static double turnCommandI = 3;
+        public static double turnCommandP = 2.5; //
+        public static double turnCommandI = 3.5;
         public static double turnCommandD = 0.0;
-        public static double turnCommandAngleTolerance = Math.toRadians(3);
+        public static double turnCommandAngleTolerance = Math.toRadians(4);
         public static double turnCommandVelocityTolerance = turnCommandAngleTolerance / 2;
         public static double swerveDriveFFkS = 0.0875; // overcoming static friction
         public static double swerveDriveFFkV = 0; // not needed
@@ -88,12 +88,12 @@ public class Config {
         public static double wheelDiameter = 0.1016;
         public static class AutoPiecePickup {
             public static Constraints turnControllerConstraints = new Constraints(TeleoperatedConstants.maxAngularVelocity, TeleoperatedConstants.maxAngularVelocity * 2); // these values are definitely wrong for vision lmao
-            public static double turnCommandP = 4;
+            public static double turnCommandP = 4.5;
             public static double turnCommandI = 3.5;
-            public static double turnCommandD = 0;
-            public static double turnCommandAngleTolerance = Math.toRadians(0.375);
+            public static double turnCommandD = 0.25;
+            public static double turnCommandAngleTolerance = Math.toRadians(0.5); // 0.375, keep increasing this value until we see a % success decrease
             public static double turnCommandVelocityTolerance = turnCommandAngleTolerance / 2;
-            public static double piecePickupVelocity = 2; // 2 meters per second
+            public static double piecePickupVelocity = 2; // meters/second
             public static double gamePieceXValue = 7.11835;
             public static double[] gamePieceYValues = {0.919226, 2.138426, 3.357626, 4.576826};
         }
@@ -107,15 +107,16 @@ public class Config {
         }
     }
     public static class DEBUGGING {
-        public static boolean useDebugTab = true;
+        public static boolean useDebugTab = false;
         public static boolean reportSwervePositions = false;
         public static boolean reportChassisSpeeds = false;
         public static boolean bypassAutoChecks = false; // VERY DANGEROUS TO LEAVE TRUE
-        public static boolean ppSpeedDebug = true;
+        public static boolean ppSpeedDebug = false;
+        public static boolean bypassAutoTurnTo = true;
     }
 
     public static class AutonomousConstants {
-        public static double maxVelocity = 2;
+        public static double maxVelocity = 3;
         public static double maxAccel = 3;
         public static double lowestVelocity = 0.05;
         public static double lowestAngularVelocity = 0.1;

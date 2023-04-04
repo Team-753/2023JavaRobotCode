@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
@@ -144,6 +145,17 @@ public class Arm extends SubsystemBase {
             if (newValue >= 0.0 && newValue <= maxHeightInches) {
                 targetValue = newValue;
             }
+        }
+    }
+
+    public void startArmMovement() {
+        // only run if we KNOW the arm is zeroed
+        zeroed = true;
+        if (Config.ArmConstants.useNEO) {
+            armNEO.set(1);
+        }
+        else {
+            armFalcon.set(ControlMode.PercentOutput, 1);
         }
     }
 }

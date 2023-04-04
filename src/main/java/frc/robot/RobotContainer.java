@@ -168,7 +168,7 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-    arm.setPosition("Optimized");
+    arm.startArmMovement(); // could be bad
     SmartDashboard.putBoolean("Autonomous Finished", false);
     String autoName = autoChooser.getSelected();
     Command command;

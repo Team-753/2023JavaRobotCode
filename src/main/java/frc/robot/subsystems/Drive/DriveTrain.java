@@ -202,6 +202,11 @@ public class DriveTrain extends SubsystemBase {
         double pitch = navxAHRS.getPitch();
         double roll = navxAHRS.getRoll();
         double yaw = currentEstimatedPose.getRotation().getDegrees();
+//         double[] gravityVec = new gravityVec[3];
+//         m_pigeon2.getGravityVector(gravityVec);
+//         double gravityVecXY = Math.sqrt(gravityVec[0] * gravityVec[0] + gravityVec[1] * gravityVec[1]);
+//         double gravityVecZ = gravityVec[2];
+//         double tiltAngle = Math.atan2(gravityVecXY, gravityVecZ);
         currentTilt = Math.abs(roll * Math.cos(yaw)) + Math.abs(pitch * Math.sin(yaw));
         tiltTimeStamp = Timer.getFPGATimestamp();
         deltaTilt = (currentTilt - oldTilt) / (tiltTimeStamp - oldTime);
