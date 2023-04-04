@@ -13,22 +13,25 @@ import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Config;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 
 public class Arm extends SubsystemBase {
     private double targetValue = 0.0;
     private double maxHeightInches = 42.5;
     private double falconEncoderTicksToDistanceConversionFactor = 1.0 / (2.0 * 4.0 * 2048.0);
-    private double neoEncoderTicksToDistanceConversionFactor = 1.0 / (2.0 * 4.0 * 42.0);
+    private double neoEncoderTicksToDistanceConversionFactor = 1.0 / (2.0 * 4.0);
     private boolean zeroed;
     private DigitalInput limitSwitch;
     private TalonFX armFalcon;
     private CANSparkMax armNEO;
     private RelativeEncoder neoEncoder;
-    private SparkMaxPIDController neoPID;
+    //private SparkMaxPIDController neoPID;
+    private ProfiledPIDController pidController;
 
     public Arm() {
         limitSwitch = new DigitalInput(Config.ArmConstants.limitSwitchID);
@@ -36,17 +39,18 @@ public class Arm extends SubsystemBase {
         if (Config.ArmConstants.useNEO) {
             armNEO = new CANSparkMax(Config.ArmConstants.armID, MotorType.kBrushless);
             armNEO.setIdleMode(IdleMode.kCoast);
-            armNEO.setSmartCurrentLimit(40);
+            armNEO.setSmartCurrentLimit(80);
             armNEO.enableVoltageCompensation(12.0);
             neoEncoder = armNEO.getEncoder();
-            neoPID = armNEO.getPIDController();
-            neoPID.setFeedbackDevice(neoEncoder);
-            neoPID.setP(0.1);
-            neoPID.setI(0.005);
-            neoPID.setD(0.0);
-            neoPID.setFF(0.5);
-            neoPID.setIZone(400.0);
-            neoPID.setReference(targetValue, ControlType.kPosition);
+            pidController = new ProfiledPIDController(0.75, 0.0, 0.0, new TrapezoidProfile.Constraints(12, 24));
+            // neoPID = armNEO.getPIDController();
+            // neoPID.setFeedbackDevice(neoEncoder);
+            // neoPID.setP(2.0);
+            // neoPID.setI(0.5);
+            // neoPID.setD(0.0);
+            // neoPID.setFF(0.0);
+            // neoPID.setIZone(400.0);
+            // neoPID.setReference(targetValue, ControlType.kPosition);
         }
         else {
             armFalcon = new TalonFX(Config.ArmConstants.armID);
@@ -85,7 +89,7 @@ public class Arm extends SubsystemBase {
             }
             else {
                 if (Config.ArmConstants.useNEO) {
-                    armNEO.set(-0.25);
+                    armNEO.set(-0.45);
                 }
                 else {
                     armFalcon.set(TalonFXControlMode.PercentOutput, -0.25);
@@ -94,7 +98,9 @@ public class Arm extends SubsystemBase {
         }
         else {
             if (Config.ArmConstants.useNEO) {
-                neoPID.setReference(targetValue / neoEncoderTicksToDistanceConversionFactor, ControlType.kPosition);
+                double output = pidController.calculate(neoEncoder.getPosition() * neoEncoderTicksToDistanceConversionFactor, new TrapezoidProfile.State(targetValue, 0.0));
+                armNEO.set(output);
+                //SmartDashboard.putNumber("Arm Output", output);
                 SmartDashboard.putNumber("Arm Position", neoEncoder.getPosition() * neoEncoderTicksToDistanceConversionFactor);
             }
             else {

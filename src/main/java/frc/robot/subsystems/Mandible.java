@@ -57,13 +57,13 @@ public class Mandible extends SubsystemBase {
 
     }
 
-    @Override
-    public void periodic() {
-        super.periodic();
-        double v1 = leftMotor.getMotorOutputVoltage();
-        double v2 = rightMotor.getMotorOutputVoltage();
-        SmartDashboard.putNumber("Mandible Avg. Voltage", (v1 + v2) / 2.0);
-    }
+    // @Override
+    // public void periodic() {
+    //     super.periodic();
+    //     double v1 = leftMotor.getMotorOutputVoltage();
+    //     double v2 = rightMotor.getMotorOutputVoltage();
+    //     SmartDashboard.putNumber("Mandible Avg. Voltage", (v1 + v2) / 2.0);
+    // }
 
     private void Open() {
         open = true;

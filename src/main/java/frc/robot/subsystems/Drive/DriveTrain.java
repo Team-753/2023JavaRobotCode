@@ -36,6 +36,8 @@ import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
+import java.util.Optional;
+
 import com.kauailabs.navx.frc.AHRS;
 
 public class DriveTrain extends SubsystemBase {
@@ -47,7 +49,7 @@ public class DriveTrain extends SubsystemBase {
     public SwerveDriveKinematics kinematics;
     private SwerveDrivePoseEstimator poseEstimator;
     private static final Vector<N3> stateStdDevs = VecBuilder.fill(0.05, 0.05, Math.toRadians(5));
-    private static final Vector<N3> visionMeasurementStdDevs = VecBuilder.fill(0.5, 0.5, Math.toRadians(30));
+    private static final Vector<N3> visionMeasurementStdDevs = VecBuilder.fill(0.75, 0.75, Math.toRadians(30));
     private double speedLimitingFactor = 1;
     public Command enableSpeedLimiterCommand;
     public Command disableSpeedLimiterCommand;
@@ -151,14 +153,16 @@ public class DriveTrain extends SubsystemBase {
                     Translation2d translation = poseToTag.toPose2d().getTranslation();
                     double distance = Math.hypot(translation.getX(), translation.getY());
                     SmartDashboard.putNumber("Tag Distance", distance);
-                    if (distance <= Config.DimensionalConstants.apriltagThresholdDistance) {
-                        if (isRedAlliance) {
-                            poseEstimator.addVisionMeasurement(LimelightHelper.getBotPose2d_wpiRed(Config.DimensionalConstants.limelightName), LimelightHelper.getLatency_Capture(Config.DimensionalConstants.limelightName) + LimelightHelper.getLatency_Pipeline(Config.DimensionalConstants.limelightName));
-                        }
-                        else {
-                            poseEstimator.addVisionMeasurement(LimelightHelper.getBotPose2d_wpiBlue(Config.DimensionalConstants.limelightName), LimelightHelper.getLatency_Capture(Config.DimensionalConstants.limelightName) + LimelightHelper.getLatency_Pipeline(Config.DimensionalConstants.limelightName));
-                        }
+                    if (isRedAlliance) {
+                        poseEstimator.addVisionMeasurement(LimelightHelper.getBotPose2d_wpiRed(Config.DimensionalConstants.limelightName), LimelightHelper.getLatency_Capture(Config.DimensionalConstants.limelightName) + LimelightHelper.getLatency_Pipeline(Config.DimensionalConstants.limelightName));
                     }
+                    else {
+                        poseEstimator.addVisionMeasurement(LimelightHelper.getBotPose2d_wpiBlue(Config.DimensionalConstants.limelightName), LimelightHelper.getLatency_Capture(Config.DimensionalConstants.limelightName) + LimelightHelper.getLatency_Pipeline(Config.DimensionalConstants.limelightName));
+                        // poseEstimator.resetPosition(navxAHRS.getRotation2d(), getSwerveModulePositions(), LimelightHelper.getBotPose2d_wpiBlue(Config.DimensionalConstants.limelightName));
+                    }
+                    // if (distance <= Config.DimensionalConstants.apriltagThresholdDistance) {
+
+                    // }
                 }
             }
             catch (ConcurrentModificationException e) {
@@ -166,8 +170,9 @@ public class DriveTrain extends SubsystemBase {
             }
         }
         if (photonPoseEstimator != null) {
-            EstimatedRobotPose estimation = photonPoseEstimator.update().get();
-            if (estimation != null) {  
+            Optional<EstimatedRobotPose> result = photonPoseEstimator.update();
+            if (result.isPresent()) {
+                EstimatedRobotPose estimation = result.get();
                 if (estimation.targetsUsed.size() > 1) { // using multi-tag pnp, it is probably trustworthy
                     poseEstimator.addVisionMeasurement(estimation.estimatedPose.toPose2d(), estimation.timestampSeconds);
                 }
@@ -359,6 +364,10 @@ public class DriveTrain extends SubsystemBase {
         if (Config.AutonomousConstants.usePoseReset) {
             poseEstimator.resetPosition(navxAHRS.getRotation2d(), getSwerveModulePositions(), poseToSet);
         }
+    }
+
+    public void resetPose(Pose2d poseToSet, boolean override) {
+        poseEstimator.resetPosition(navxAHRS.getRotation2d(), getSwerveModulePositions(), poseToSet);
     }
 
     // public void PPDrive(ChassisSpeeds speeds) {

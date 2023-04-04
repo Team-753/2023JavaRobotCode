@@ -9,8 +9,9 @@ import frc.robot.subsystems.Drive.DriveTrain;
 public class DriverConfirmCommand extends CommandBase {
     private GenericHID joystick;
     private Mandible mandible;
-    public DriverConfirmCommand(CommandJoystick kJoystick, DriveTrain kDriveTrain, Mandible mandible) {
+    public DriverConfirmCommand(CommandJoystick kJoystick, DriveTrain kDriveTrain, Mandible kMandible) {
         joystick = kJoystick.getHID();
+        mandible = kMandible;
         addRequirements(kDriveTrain); // so the robot doesn't yk; move.
     }
 

@@ -60,7 +60,7 @@ public class StreamDeck extends SubsystemBase {
             return;
         }
         if (streamDeck.getRawButtonReleased(18)) {
-            arm.setPosition("MidCone");
+            arm.setPosition("MidConePrep");
             return;
         }
         if (streamDeck.getRawButtonReleased(19)) {
@@ -68,7 +68,7 @@ public class StreamDeck extends SubsystemBase {
             return;
         }
         if (streamDeck.getRawButtonReleased(20)) {
-            arm.setPosition("HighCone");
+            arm.setPosition("HighConePrep");
             return;
         }
         if (streamDeck.getRawButtonReleased(21)) {

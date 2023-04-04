@@ -344,6 +344,58 @@
               "_glyph": 148,
               "_showGlyph": false
             }
+          },
+          "9,1": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Arm Output",
+              "_title": "Arm Output",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "10,1": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/ppVx",
+              "_title": "ppVx",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "7,2": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/ppVy",
+              "_title": "ppVy",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "8,2": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/ppVO",
+              "_title": "ppVO",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
           }
         }
       }
@@ -363,9 +415,9 @@
     }
   ],
   "windowGeometry": {
-    "x": 1482.0,
-    "y": 285.0,
-    "width": 1856.0,
-    "height": 914.0
+    "x": -7.333333492279053,
+    "y": -7.333333492279053,
+    "width": 1294.6666259765625,
+    "height": 766.6666870117188
   }
 }

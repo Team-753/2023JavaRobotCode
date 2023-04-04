@@ -76,7 +76,7 @@ public class Config {
     public static class DriveConstants {
         public static Constraints turnControllerConstraints = new Constraints(TeleoperatedConstants.maxAngularVelocity, TeleoperatedConstants.maxAngularVelocity * 2);
         public static double turnCommandP = 2; //
-        public static double turnCommandI = 2.5;
+        public static double turnCommandI = 3;
         public static double turnCommandD = 0.0;
         public static double turnCommandAngleTolerance = Math.toRadians(3);
         public static double turnCommandVelocityTolerance = turnCommandAngleTolerance / 2;
@@ -110,7 +110,7 @@ public class Config {
         public static boolean useDebugTab = true;
         public static boolean reportSwervePositions = false;
         public static boolean reportChassisSpeeds = false;
-        public static boolean bypassAutoChecks = true; // VERY DANGEROUS TO LEAVE TRUE
+        public static boolean bypassAutoChecks = false; // VERY DANGEROUS TO LEAVE TRUE
         public static boolean ppSpeedDebug = true;
     }
 
@@ -127,7 +127,7 @@ public class Config {
         public static double rotationKD = 0;
         public static boolean usePPServer = true;
         public static boolean usePoseReset = true;
-        public static boolean usePhotonCamera = false;
+        public static boolean usePhotonCamera = true;
         public static boolean useLLForPoseEstimation = true;
         public static String photonCameraName = "photoncameraone";
         public static Transform3d cameraTransformation = new Transform3d(new Translation3d(-0.36195, 0.0, -0.5969), new Rotation3d());
@@ -163,11 +163,11 @@ public class Config {
         static {
             armValues.put("FullyRetracted", 0.0);
             armValues.put("Substation", 37.9);
-            armValues.put("Floor", 42.1);
+            armValues.put("Floor", 42.25);
             armValues.put("BottomPlacement", 40.4);
             armValues.put("HighConePrep", 35.2);
             armValues.put("HighConePlacement", 37.16);
-            armValues.put("MidConePrep", 35.2);
+            armValues.put("MidConePrep", 37.75);
             armValues.put("MidConePlacement", 38.5);
             armValues.put("HighCube", 37.1);
             armValues.put("MidCube", 38.54);
