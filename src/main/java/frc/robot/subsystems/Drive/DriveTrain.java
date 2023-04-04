@@ -48,8 +48,8 @@ public class DriveTrain extends SubsystemBase {
     private SwerveModule rearRightModule;
     public SwerveDriveKinematics kinematics;
     private SwerveDrivePoseEstimator poseEstimator;
-    private static final Vector<N3> stateStdDevs = VecBuilder.fill(0.05, 0.05, Math.toRadians(5));
-    private static final Vector<N3> visionMeasurementStdDevs = VecBuilder.fill(0.75, 0.75, Math.toRadians(30));
+    private static final Vector<N3> stateStdDevs = VecBuilder.fill(0.10, 0.10, 0.10);
+    private static final Vector<N3> visionMeasurementStdDevs = VecBuilder.fill(0.90, 0.90, 0.90 * Math.PI);
     private double speedLimitingFactor = 1;
     public Command enableSpeedLimiterCommand;
     public Command disableSpeedLimiterCommand;
@@ -58,7 +58,6 @@ public class DriveTrain extends SubsystemBase {
     private double deltaTilt = 0;
     private double currentTilt = 0;
     private double tiltTimeStamp = 0;
-    private Timer tiltTimer = new Timer();
     private boolean isRedAlliance = false;
     private Field2d kField2d = new Field2d();
     private ShuffleboardTab debuggingTab;
@@ -87,7 +86,6 @@ public class DriveTrain extends SubsystemBase {
         enableSpeedLimiterCommand = runOnce(() -> enableSpeedLimiter());
         disableSpeedLimiterCommand = runOnce(() -> disableSpeedLimiter());
         goXModeCommand = run(() -> goXMode());
-        tiltTimer.start();
         SmartDashboard.putData("Field", kField2d);
         if (Config.AutonomousConstants.usePhotonCamera) {
             photonCamera = new PhotonCamera(Config.AutonomousConstants.photonCameraName);
@@ -146,6 +144,7 @@ public class DriveTrain extends SubsystemBase {
     @Override
     public void periodic() {
         super.periodic();
+        double time = Timer.getFPGATimestamp();
         if (Config.AutonomousConstants.useLLForPoseEstimation) {
             try {
                 if (LimelightHelper.getCurrentPipelineIndex(Config.DimensionalConstants.limelightName) == 0.0 && LimelightHelper.getTV(Config.DimensionalConstants.limelightName)) {
@@ -153,11 +152,22 @@ public class DriveTrain extends SubsystemBase {
                     Translation2d translation = poseToTag.toPose2d().getTranslation();
                     double distance = Math.hypot(translation.getX(), translation.getY());
                     SmartDashboard.putNumber("Tag Distance", distance);
+                    // ChassisSpeeds speeds = actualChassisSpeeds();
+                    // if (Math.abs(speeds.vxMetersPerSecond) < 0.25 && Math.abs(speeds.vyMetersPerSecond) < 0.25 && Math.abs(speeds.omegaRadiansPerSecond) < 0.35) {
+                    //     if (isRedAlliance) {
+                    //         // poseEstimator.addVisionMeasurement(LimelightHelper.getBotPose2d_wpiRed(Config.DimensionalConstants.limelightName), LimelightHelper.getLatency_Capture(Config.DimensionalConstants.limelightName) + LimelightHelper.getLatency_Pipeline(Config.DimensionalConstants.limelightName));
+                    //         poseEstimator.resetPosition(navxAHRS.getRotation2d(), getSwerveModulePositions(), LimelightHelper.getBotPose2d_wpiBlue(Config.DimensionalConstants.limelightName));
+                    //     }
+                    //     else {
+                    //         // poseEstimator.addVisionMeasurement(LimelightHelper.getBotPose2d_wpiBlue(Config.DimensionalConstants.limelightName), LimelightHelper.getLatency_Capture(Config.DimensionalConstants.limelightName) + LimelightHelper.getLatency_Pipeline(Config.DimensionalConstants.limelightName));
+                    //         poseEstimator.resetPosition(navxAHRS.getRotation2d(), getSwerveModulePositions(), LimelightHelper.getBotPose2d_wpiBlue(Config.DimensionalConstants.limelightName));
+                    //     }
+                    // }
                     if (isRedAlliance) {
-                        poseEstimator.addVisionMeasurement(LimelightHelper.getBotPose2d_wpiRed(Config.DimensionalConstants.limelightName), LimelightHelper.getLatency_Capture(Config.DimensionalConstants.limelightName) + LimelightHelper.getLatency_Pipeline(Config.DimensionalConstants.limelightName));
+                        poseEstimator.addVisionMeasurement(LimelightHelper.getBotPose2d_wpiRed(Config.DimensionalConstants.limelightName), time - ((LimelightHelper.getLatency_Capture(Config.DimensionalConstants.limelightName) + LimelightHelper.getLatency_Pipeline(Config.DimensionalConstants.limelightName)) / 1000));
                     }
                     else {
-                        poseEstimator.addVisionMeasurement(LimelightHelper.getBotPose2d_wpiBlue(Config.DimensionalConstants.limelightName), LimelightHelper.getLatency_Capture(Config.DimensionalConstants.limelightName) + LimelightHelper.getLatency_Pipeline(Config.DimensionalConstants.limelightName));
+                        poseEstimator.addVisionMeasurement(LimelightHelper.getBotPose2d_wpiBlue(Config.DimensionalConstants.limelightName), time - ((LimelightHelper.getLatency_Capture(Config.DimensionalConstants.limelightName) + LimelightHelper.getLatency_Pipeline(Config.DimensionalConstants.limelightName)) / 1000));
                         // poseEstimator.resetPosition(navxAHRS.getRotation2d(), getSwerveModulePositions(), LimelightHelper.getBotPose2d_wpiBlue(Config.DimensionalConstants.limelightName));
                     }
                     // if (distance <= Config.DimensionalConstants.apriltagThresholdDistance) {
@@ -193,7 +203,7 @@ public class DriveTrain extends SubsystemBase {
         double roll = navxAHRS.getRoll();
         double yaw = currentEstimatedPose.getRotation().getDegrees();
         currentTilt = Math.abs(roll * Math.cos(yaw)) + Math.abs(pitch * Math.sin(yaw));
-        tiltTimeStamp = tiltTimer.get();
+        tiltTimeStamp = Timer.getFPGATimestamp();
         deltaTilt = (currentTilt - oldTilt) / (tiltTimeStamp - oldTime);
         SmartDashboard.putNumber("X", currentEstimatedPose.getX());
         SmartDashboard.putNumber("Y", currentEstimatedPose.getY());
