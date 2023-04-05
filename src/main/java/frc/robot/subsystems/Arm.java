@@ -41,7 +41,7 @@ public class Arm extends SubsystemBase {
             armNEO.setSmartCurrentLimit(80);
             armNEO.enableVoltageCompensation(12.0);
             neoEncoder = armNEO.getEncoder();
-            pidController = new ProfiledPIDController(0.75, 0.0, 0.0, new TrapezoidProfile.Constraints(12, 24));
+            pidController = new ProfiledPIDController(0.75, 0.0, 0.0, new TrapezoidProfile.Constraints(12, 12));
             // neoPID = armNEO.getPIDController();
             // neoPID.setFeedbackDevice(neoEncoder);
             // neoPID.setP(2.0);

@@ -31,19 +31,24 @@ public class LockOnPieceCommand extends CommandBase {
 
     @Override
     public void execute() {
-        System.out.println(LimelightHelper.getTV(Config.DimensionalConstants.limelightName));
+        //System.out.println(LimelightHelper.getTV(Config.DimensionalConstants.limelightName));
         if (LimelightHelper.getTV(Config.DimensionalConstants.limelightName)) {
             // we see a valid target; lets aim at it
             //double ID = LimelightHelper.getNeuralClassID(Config.DimensionalConstants.limelightName);
-            String ID = NetworkTableInstance.getDefault().getTable("limelight").getEntry("tclass").getString("Nada");
+            String ID = NetworkTableInstance.getDefault().getTable("limelight").getEntry("tclass").getString("Nada").strip();
             System.out.println(ID);
-            if (ID.strip().equals("cone")) {
+            if (ID.equals("cone")) {
                 // it is a cone
-                mandible.setOpen(false);
+                if (mandible.open) {
+                    mandible.setOpen(false);
+                }
             }
             else {
                 // it is a cube
-                mandible.setOpen(true);
+                if (!mandible.open){
+                    mandible.setOpen(true);
+                }
+
             }
             double response = angleController.calculate(Math.toRadians(LimelightHelper.getTX(Config.DimensionalConstants.limelightName)), targetState); // trying to aim to 0 degrees
             driveTrain.setChassisSpeeds(0.0, 0.0, response, true);
@@ -62,7 +67,7 @@ public class LockOnPieceCommand extends CommandBase {
 
     @Override
     public boolean isFinished() {
-        return angleController.atGoal() || Config.DEBUGGING.bypassAutoChecks;
+        return false; //angleController.atGoal() || Config.DEBUGGING.bypassAutoChecks;
     }
 
     

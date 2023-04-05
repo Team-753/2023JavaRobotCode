@@ -105,7 +105,7 @@ public class MoveToPlacementCommand extends CommandBase {
         SmartDashboard.putString("Target Pose", String.format("X: %f, Y: %f, Z: %f", targetPose2d.getX(), targetPose2d.getY(), targetPose2d.getRotation().getDegrees()));
         Rotation2d heading = new Rotation2d(targetPose2d.getX() - currentPose.getX(), targetPose2d.getY() - currentPose.getY());
         //PathPoint.fromCurrentHolonomicState(currentPose, driveTrain.actualChassisSpeeds())
-        return PathPlanner.generatePath(Config.AutonomousConstants.onTheFlyConstraints, new PathPoint(currentPose.getTranslation(), heading, currentPose.getRotation()), new PathPoint(targetPose2d.getTranslation(), heading, targetPose2d.getRotation()));
+        return PathPlanner.generatePath(Config.AutonomousConstants.onTheFlyConstraints, new PathPoint(currentPose.getTranslation(), heading, currentPose.getRotation()), new PathPoint(targetPose2d.getTranslation(), Rotation2d.fromRadians(Math.PI), targetPose2d.getRotation()));
     }
 
     @Override

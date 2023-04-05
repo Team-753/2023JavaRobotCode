@@ -31,8 +31,8 @@ public class TurnToPieceCommand extends CommandBase {
     public void execute() {
         double output = angleController.calculate(driveTrain.getEstimatedPose().getRotation().getRadians(), targetState);
         driveTrain.setChassisSpeeds(0.0, 0.0, output, true);
-        System.out.println(String.format("Output %f", output));
-        System.out.println(String.format("Target %f", Math.toDegrees(targetState.position)));
+        //System.out.println(String.format("Output %f", output));
+        //System.out.println(String.format("Target %f", Math.toDegrees(targetState.position)));
     }
 
     @Override

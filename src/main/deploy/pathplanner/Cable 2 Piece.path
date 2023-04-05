@@ -79,5 +79,12 @@
   "maxVelocity": 2.0,
   "maxAcceleration": null,
   "isReversed": null,
-  "markers": []
+  "markers": [
+    {
+      "position": 0.33939393939393664,
+      "names": [
+        "ArmFloorPickupPrep"
+      ]
+    }
+  ]
 }

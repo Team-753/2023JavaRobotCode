@@ -168,7 +168,8 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-    arm.startArmMovement(); // could be bad
+    //arm.startArmMovement(); // could be bad
+    mandible.setOpen(true);
     SmartDashboard.putBoolean("Autonomous Finished", false);
     String autoName = autoChooser.getSelected();
     Command command;
@@ -207,7 +208,7 @@ public class RobotContainer {
       new LockOnPieceCommand(driveTrain, mandible), // doing the final correction using the limelight google coral pipeline
       new ArmConfirmPositionCommand(arm, "Floor"), // moving the arm into pickup position
       new DriveUntilOnPieceCommand(driveTrain, mandible),
-      new SetArmPositionCommand(arm, "Optimized")));
+      new SetArmPositionCommand(arm, "Substation")));
     eventMap.put("Place Piece", new SequentialCommandGroup(
       new CalculateArmPositionCommand(arm, secondPiecePlacementChooser, false),
       new MoveToPlacementCommand(driveTrain, secondPiecePlacementChooser),

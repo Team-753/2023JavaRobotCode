@@ -75,7 +75,7 @@ public class Config {
     }
     public static class DriveConstants {
         public static Constraints turnControllerConstraints = new Constraints(TeleoperatedConstants.maxAngularVelocity, TeleoperatedConstants.maxAngularVelocity * 2);
-        public static double turnCommandP = 2.5; //
+        public static double turnCommandP = 3.5; //
         public static double turnCommandI = 3.5;
         public static double turnCommandD = 0.0;
         public static double turnCommandAngleTolerance = Math.toRadians(4);
@@ -88,10 +88,10 @@ public class Config {
         public static double wheelDiameter = 0.1016;
         public static class AutoPiecePickup {
             public static Constraints turnControllerConstraints = new Constraints(TeleoperatedConstants.maxAngularVelocity, TeleoperatedConstants.maxAngularVelocity * 2); // these values are definitely wrong for vision lmao
-            public static double turnCommandP = 4.5;
+            public static double turnCommandP = 8;
             public static double turnCommandI = 3.5;
             public static double turnCommandD = 0.25;
-            public static double turnCommandAngleTolerance = Math.toRadians(0.5); // 0.375, keep increasing this value until we see a % success decrease
+            public static double turnCommandAngleTolerance = Math.toRadians(1.5); // 0.375, keep increasing this value until we see a % success decrease
             public static double turnCommandVelocityTolerance = turnCommandAngleTolerance / 2;
             public static double piecePickupVelocity = 2; // meters/second
             public static double gamePieceXValue = 7.11835;
@@ -112,30 +112,30 @@ public class Config {
         public static boolean reportChassisSpeeds = false;
         public static boolean bypassAutoChecks = false; // VERY DANGEROUS TO LEAVE TRUE
         public static boolean ppSpeedDebug = false;
-        public static boolean bypassAutoTurnTo = true;
+        public static boolean bypassAutoTurnTo = false;
     }
 
     public static class AutonomousConstants {
         public static double maxVelocity = 3;
-        public static double maxAccel = 3;
+        public static double maxAccel = 2;
         public static double lowestVelocity = 0.05;
         public static double lowestAngularVelocity = 0.1;
         public static double translationKP = 5; // 5
         public static double translationKI = 0;
         public static double translationKD = 0;
-        public static double rotationKP = 1; // 3
+        public static double rotationKP = 5; // 3
         public static double rotationKI = 0;
         public static double rotationKD = 0;
         public static boolean usePPServer = true;
-        public static boolean usePoseReset = true;
-        public static boolean usePhotonCamera = true;
+        public static boolean usePoseReset = false;
+        public static boolean usePhotonCamera = false;
         public static boolean useLLForPoseEstimation = true;
         public static String photonCameraName = "photoncameraone";
         public static Transform3d cameraTransformation = new Transform3d(new Translation3d(-0.36195, 0.0, -0.5969), new Rotation3d());
         public static double chargeInitialSpeed = 2.25;
         public static double chargeFinalSpeed = 0.5;
         public static double chargeDAngleThreshold = -17.5;
-        public static PathConstraints onTheFlyConstraints = new PathConstraints(2, 2);
+        public static PathConstraints onTheFlyConstraints = new PathConstraints(1.5, 2);
         public static PIDConstants translationConstants = new PIDConstants(translationKP, translationKI, translationKD);
         public static PIDConstants rotationConstants = new PIDConstants(rotationKP, rotationKI, rotationKD);
     }
@@ -147,7 +147,7 @@ public class Config {
         public static double outtakeSpeed = 0.35;
         public static double intakeSpeed = 0.50;
         public static double idleSpeed = 0.20;
-        public static double defaultOuttakeTime = 0.50;
+        public static double defaultOuttakeTime = 0.125;
         public static boolean useDistanceSensor = true;
         public static int distanceSensorID = 12;
         public static double distanceRangeThreshold = 40; // 40 millimeters
