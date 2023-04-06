@@ -75,8 +75,8 @@ public class Config {
     }
     public static class DriveConstants {
         public static Constraints turnControllerConstraints = new Constraints(TeleoperatedConstants.maxAngularVelocity, TeleoperatedConstants.maxAngularVelocity * 2);
-        public static double turnCommandP = 3.5; //
-        public static double turnCommandI = 3.5;
+        public static double turnCommandP = 3; //
+        public static double turnCommandI = 2;
         public static double turnCommandD = 0.0;
         public static double turnCommandAngleTolerance = Math.toRadians(4);
         public static double turnCommandVelocityTolerance = turnCommandAngleTolerance / 2;
@@ -126,7 +126,7 @@ public class Config {
         public static double rotationKP = 5; // 3
         public static double rotationKI = 0;
         public static double rotationKD = 0;
-        public static boolean usePPServer = true;
+        public static boolean usePPServer = false;
         public static boolean usePoseReset = false;
         public static boolean usePhotonCamera = false;
         public static boolean useLLForPoseEstimation = true;
@@ -147,13 +147,13 @@ public class Config {
         public static double outtakeSpeed = 0.35;
         public static double intakeSpeed = 0.50;
         public static double idleSpeed = 0.20;
-        public static double defaultOuttakeTime = 0.125;
+        public static double defaultOuttakeTime = 0.25;
         public static boolean useDistanceSensor = true;
         public static int distanceSensorID = 12;
         public static double distanceRangeThreshold = 40; // 40 millimeters
     }
     public static class ArmConstants {
-        public static boolean useNEO = true;
+        public static boolean useNEO = false;
         public static double armIncrement = 0.5;
         public static double armSlowdownFactor = 0.2;
         public static int armID = 9;

@@ -3,14 +3,14 @@
     {
       "anchorPoint": {
         "x": 2.12,
-        "y": 4.42
+        "y": 1.0650304574630494
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.8785398496063914,
-        "y": 4.469324241139585
+        "x": 3.5536930860338605,
+        "y": 0.6371164343752167
       },
-      "holonomicAngle": -180.0,
+      "holonomicAngle": 180.0,
       "isReversal": false,
       "velOverride": null,
       "isLocked": false,
@@ -26,16 +26,16 @@
     },
     {
       "anchorPoint": {
-        "x": 3.353999875259538,
-        "y": 4.640489850374719
+        "x": 4.1337543173307,
+        "y": 0.8177912441234144
       },
       "prevControl": {
-        "x": 3.002159456276209,
-        "y": 4.469324241139586
+        "x": 3.315963073207286,
+        "y": 0.7512268405319723
       },
       "nextControl": {
-        "x": 3.7058402942428685,
-        "y": 4.8116554596098515
+        "x": 4.790074458838356,
+        "y": 0.8712126509903179
       },
       "holonomicAngle": 180.0,
       "isReversal": false,
@@ -51,18 +51,18 @@
     },
     {
       "anchorPoint": {
-        "x": 5.721790803012212,
-        "y": 4.5834346472963405
+        "x": 5.797864407116715,
+        "y": 1.4263800769594424
       },
       "prevControl": {
-        "x": 5.849469233747249,
-        "y": 4.481764785785106
+        "x": 6.111668024047793,
+        "y": 1.7116560923513309
       },
       "nextControl": {
-        "x": 4.948794685591406,
-        "y": 5.198968592649946
+        "x": 5.34129904946008,
+        "y": 1.0113206609079561
       },
-      "holonomicAngle": 0.01,
+      "holonomicAngle": -21.354377364898063,
       "isReversal": false,
       "velOverride": null,
       "isLocked": false,
@@ -79,11 +79,11 @@
     {
       "anchorPoint": {
         "x": 2.12,
-        "y": 4.423255560796836
+        "y": 1.07
       },
       "prevControl": {
-        "x": 3.473472330823162,
-        "y": 4.423255560796836
+        "x": 5.5411159932640155,
+        "y": 0.17116560923513285
       },
       "nextControl": null,
       "holonomicAngle": 180.0,
@@ -95,21 +95,11 @@
         "names": [
           "Place Piece"
         ],
-        "executionBehavior": "parallel",
+        "executionBehavior": "sequential",
         "waitBehavior": "none",
         "waitTime": 0
       }
     }
   ],
-  "maxVelocity": 3.0,
-  "maxAcceleration": null,
-  "isReversed": null,
-  "markers": [
-    {
-      "position": 1.0,
-      "names": [
-        "ArmFloorPickupPrep"
-      ]
-    }
-  ]
+  "markers": []
 }

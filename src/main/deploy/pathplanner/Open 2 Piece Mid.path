@@ -7,8 +7,8 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.8785398496063914,
-        "y": 4.469324241139585
+        "x": 2.844968975652237,
+        "y": 5.267825392793642
       },
       "holonomicAngle": -180.0,
       "isReversal": false,
@@ -26,18 +26,18 @@
     },
     {
       "anchorPoint": {
-        "x": 3.353999875259538,
-        "y": 4.640489850374719
+        "x": 4.161925323850648,
+        "y": 4.5520882470336375
       },
       "prevControl": {
-        "x": 3.002159456276209,
-        "y": 4.469324241139586
+        "x": 3.494130759684841,
+        "y": 4.704727004557252
       },
       "nextControl": {
-        "x": 3.7058402942428685,
-        "y": 4.8116554596098515
+        "x": 4.6629413258826515,
+        "y": 4.437570303712036
       },
-      "holonomicAngle": 180.0,
+      "holonomicAngle": 0,
       "isReversal": false,
       "velOverride": null,
       "isLocked": false,
@@ -79,11 +79,11 @@
     {
       "anchorPoint": {
         "x": 2.12,
-        "y": 4.423255560796836
+        "y": 2.75
       },
       "prevControl": {
-        "x": 3.473472330823162,
-        "y": 4.423255560796836
+        "x": 1.791424817417536,
+        "y": 5.4654010542588995
       },
       "nextControl": null,
       "holonomicAngle": 180.0,
@@ -101,15 +101,5 @@
       }
     }
   ],
-  "maxVelocity": 3.0,
-  "maxAcceleration": null,
-  "isReversed": null,
-  "markers": [
-    {
-      "position": 1.0,
-      "names": [
-        "ArmFloorPickupPrep"
-      ]
-    }
-  ]
+  "markers": []
 }

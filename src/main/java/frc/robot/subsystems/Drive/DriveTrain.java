@@ -26,6 +26,7 @@ import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.apriltag.AprilTagFieldLayout.OriginPosition;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 
 import java.io.IOException;
 import java.util.ConcurrentModificationException;
@@ -68,9 +69,13 @@ public class DriveTrain extends SubsystemBase {
     private AprilTagFieldLayout fieldLayout;
     private PhotonPoseEstimator photonPoseEstimator;
     private double[] ppSpeeds = {0, 0, 0};
+    private SendableChooser<Boolean> useAutoPoseReset = new SendableChooser<>();
 
     public DriveTrain() {
         SmartDashboard.putBoolean("isRedAlliance", false);
+        useAutoPoseReset.setDefaultOption("No", false);
+        useAutoPoseReset.addOption("Yes", true);
+        SmartDashboard.putData(useAutoPoseReset);
         navxAHRS = new AHRS();
         frontLeftModule = new SwerveModule(Config.DimensionalConstants.SwerveModuleConfigurations.get("frontLeftModule"));
         frontRightModule = new SwerveModule(Config.DimensionalConstants.SwerveModuleConfigurations.get("frontRightModule"));
@@ -376,7 +381,7 @@ public class DriveTrain extends SubsystemBase {
     }
 
     public void resetPose(Pose2d poseToSet) {
-        if (Config.AutonomousConstants.usePoseReset) {
+        if (Config.AutonomousConstants.usePoseReset || useAutoPoseReset.getSelected()) {
             poseEstimator.resetPosition(navxAHRS.getRotation2d(), getSwerveModulePositions(), poseToSet);
         }
     }

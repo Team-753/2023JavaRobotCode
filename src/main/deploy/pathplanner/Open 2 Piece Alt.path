@@ -7,8 +7,8 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.8785398496063914,
-        "y": 4.469324241139585
+        "x": 5.731300003525276,
+        "y": 5.905213518612092
       },
       "holonomicAngle": -180.0,
       "isReversal": false,
@@ -26,43 +26,18 @@
     },
     {
       "anchorPoint": {
-        "x": 3.353999875259538,
-        "y": 4.640489850374719
+        "x": 5.7503184045514,
+        "y": 3.879753809329683
       },
       "prevControl": {
-        "x": 3.002159456276209,
-        "y": 4.469324241139586
+        "x": 5.978539216864911,
+        "y": 3.5849685934247315
       },
       "nextControl": {
-        "x": 3.7058402942428685,
-        "y": 4.8116554596098515
+        "x": 4.770612769682655,
+        "y": 5.145206921035145
       },
-      "holonomicAngle": 180.0,
-      "isReversal": false,
-      "velOverride": null,
-      "isLocked": false,
-      "isStopPoint": false,
-      "stopEvent": {
-        "names": [],
-        "executionBehavior": "parallel",
-        "waitBehavior": "none",
-        "waitTime": 0
-      }
-    },
-    {
-      "anchorPoint": {
-        "x": 5.721790803012212,
-        "y": 4.5834346472963405
-      },
-      "prevControl": {
-        "x": 5.849469233747249,
-        "y": 4.481764785785106
-      },
-      "nextControl": {
-        "x": 4.948794685591406,
-        "y": 5.198968592649946
-      },
-      "holonomicAngle": 0.01,
+      "holonomicAngle": 29.331839578247447,
       "isReversal": false,
       "velOverride": null,
       "isLocked": false,
@@ -82,8 +57,8 @@
         "y": 4.423255560796836
       },
       "prevControl": {
-        "x": 3.473472330823162,
-        "y": 4.423255560796836
+        "x": 4.685287947088351,
+        "y": 5.068403873462551
       },
       "nextControl": null,
       "holonomicAngle": 180.0,
@@ -101,15 +76,5 @@
       }
     }
   ],
-  "maxVelocity": 3.0,
-  "maxAcceleration": null,
-  "isReversed": null,
-  "markers": [
-    {
-      "position": 1.0,
-      "names": [
-        "ArmFloorPickupPrep"
-      ]
-    }
-  ]
+  "markers": []
 }

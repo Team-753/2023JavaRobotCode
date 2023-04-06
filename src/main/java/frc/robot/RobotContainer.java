@@ -95,8 +95,14 @@ public class RobotContainer {
     autoChooser.addOption("Place & Charge", "Place & Charge");
     autoChooser.addOption("Cable 2 Piece", "Cable 2 Piece");
     autoChooser.addOption("Open 2 Piece", "Open 2 Piece");
+    autoChooser.addOption("Cable 2 Piece Alt", "Cable 2 Piece Alt");
+    autoChooser.addOption("Open 2 Piece Alt", "Open 2 Piece Alt");
     autoChooser.addOption("Cable Taxi", "Cable Taxi");
     autoChooser.addOption("Open Taxi", "Open Taxi");
+    autoChooser.addOption("Cable Pickup with Charge", "Cable Pickup with Charge");
+    autoChooser.addOption("Open Pickup with Charge", "Open Pickup with Charge");
+    autoChooser.addOption("Cable 2 Piece Mid", "Cable 2 Piece Mid");
+    autoChooser.addOption("Open 2 Piece Mid", "Open 2 Piece Mid");
     // Grabbing the auto path names as to automatically populate our dashboard
     // File f = new File(System.getProperty("user.dir") + "/src/main/deploy/pathplanner");
     // pathnames = f.list();
@@ -117,7 +123,7 @@ public class RobotContainer {
     // if (Config.DEBUGGING.useDebugTab) {
     //   ShuffleboardTab debuggingTab = Shuffleboard.getTab("DEBUGGING");
     // }
-    SmartDashboard.putData("Drive to placement", new MoveToPlacementCommand(driveTrain, streamDeck));
+    
   }
 
   private void configureBindings() {
@@ -170,6 +176,7 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     //arm.startArmMovement(); // could be bad
     mandible.setOpen(true);
+    mandible.passiveIntake();
     SmartDashboard.putBoolean("Autonomous Finished", false);
     String autoName = autoChooser.getSelected();
     Command command;
@@ -181,7 +188,7 @@ public class RobotContainer {
         command = new SequentialCommandGroup(
           eventMap.get("Place Cube"),
           new ConsistentChargeStationAuto(driveTrain, arm, false),
-          new WaitCommand(0.5),
+          new WaitCommand(0.25),
           new ConsistentChargeStationAuto(driveTrain, arm, true)
         );
         break;
@@ -218,6 +225,16 @@ public class RobotContainer {
     ));
     eventMap.put("ArmFloorPickupPrep", new SetArmPositionCommand(arm, "FloorPickupPrep"));
     eventMap.put("ArmOptimized", new SetArmPositionCommand(arm, "Optimized"));
+    eventMap.put("ForwardCharge", new SequentialCommandGroup(
+      new ConsistentChargeStationAuto(driveTrain, arm, false),
+      new WaitCommand(0.25),
+      new ConsistentChargeStationAuto(driveTrain, arm, true)
+    ));
+    eventMap.put("ReverseCharge", new SequentialCommandGroup(
+      new ConsistentChargeStationAuto(driveTrain, arm, false, true),
+      new WaitCommand(0.25),
+      new ConsistentChargeStationAuto(driveTrain, arm, true, true)
+    ));
   }
 
   public void disabledPeriodic() {

@@ -293,19 +293,6 @@
               "_showGlyph": false
             }
           },
-          "7,1": {
-            "size": [
-              1,
-              1
-            ],
-            "content": {
-              "_type": "Command",
-              "_source0": "network_table:///SmartDashboard/Drive to placement",
-              "_title": "Drive to placement",
-              "_glyph": 148,
-              "_showGlyph": false
-            }
-          },
           "9,0": {
             "size": [
               1,
@@ -393,6 +380,32 @@
               "_type": "Text View",
               "_source0": "network_table:///SmartDashboard/ppVO",
               "_title": "ppVO",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "9,2": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "ComboBox Chooser",
+              "_source0": "network_table:///SmartDashboard/SendableChooser[2]",
+              "_title": "SendableChooser[2]",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "7,3": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "ComboBox Chooser",
+              "_source0": "network_table:///SmartDashboard/SendableChooser[2]",
+              "_title": "SmartDashboard/SendableChooser[2]",
               "_glyph": 148,
               "_showGlyph": false
             }

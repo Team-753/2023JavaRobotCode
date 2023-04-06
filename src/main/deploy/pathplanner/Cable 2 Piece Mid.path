@@ -3,14 +3,14 @@
     {
       "anchorPoint": {
         "x": 2.12,
-        "y": 4.42
+        "y": 1.0650304574630494
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.8785398496063914,
-        "y": 4.469324241139585
+        "x": 3.365705267211246,
+        "y": 0.608588832836028
       },
-      "holonomicAngle": -180.0,
+      "holonomicAngle": 180.0,
       "isReversal": false,
       "velOverride": null,
       "isLocked": false,
@@ -26,41 +26,16 @@
     },
     {
       "anchorPoint": {
-        "x": 3.353999875259538,
-        "y": 4.640489850374719
+        "x": 5.398477985568071,
+        "y": 0.9033740487409814
       },
       "prevControl": {
-        "x": 3.002159456276209,
-        "y": 4.469324241139586
+        "x": 4.782944040214466,
+        "y": 0.9463182774865816
       },
       "nextControl": {
-        "x": 3.7058402942428685,
-        "y": 4.8116554596098515
-      },
-      "holonomicAngle": 180.0,
-      "isReversal": false,
-      "velOverride": null,
-      "isLocked": false,
-      "isStopPoint": false,
-      "stopEvent": {
-        "names": [],
-        "executionBehavior": "parallel",
-        "waitBehavior": "none",
-        "waitTime": 0
-      }
-    },
-    {
-      "anchorPoint": {
-        "x": 5.721790803012212,
-        "y": 4.5834346472963405
-      },
-      "prevControl": {
-        "x": 5.849469233747249,
-        "y": 4.481764785785106
-      },
-      "nextControl": {
-        "x": 4.948794685591406,
-        "y": 5.198968592649946
+        "x": 6.014011930921677,
+        "y": 0.860429819995381
       },
       "holonomicAngle": 0.01,
       "isReversal": false,
@@ -79,11 +54,11 @@
     {
       "anchorPoint": {
         "x": 2.12,
-        "y": 4.423255560796836
+        "y": 2.75
       },
       "prevControl": {
-        "x": 3.473472330823162,
-        "y": 4.423255560796836
+        "x": 1.2159411973144936,
+        "y": -0.5569196323577841
       },
       "nextControl": null,
       "holonomicAngle": 180.0,
@@ -95,21 +70,11 @@
         "names": [
           "Place Piece"
         ],
-        "executionBehavior": "parallel",
+        "executionBehavior": "sequential",
         "waitBehavior": "none",
         "waitTime": 0
       }
     }
   ],
-  "maxVelocity": 3.0,
-  "maxAcceleration": null,
-  "isReversed": null,
-  "markers": [
-    {
-      "position": 1.0,
-      "names": [
-        "ArmFloorPickupPrep"
-      ]
-    }
-  ]
+  "markers": []
 }
