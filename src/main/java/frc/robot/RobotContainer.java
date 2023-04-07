@@ -35,6 +35,7 @@ import frc.robot.commands.AutonomousPlacement.CalculateArmPositionCommand;
 import frc.robot.commands.AutonomousPlacement.DriverConfirmCommand;
 import frc.robot.commands.AutonomousPlacement.MandiblePlacementCommand;
 import frc.robot.commands.AutonomousPlacement.MoveToPlacementCommand;
+import frc.robot.commands.CommandGroups.FastChargeStationAutoCommand;
 import frc.robot.subsystems.Arm;
 
 //import java.io.File;
@@ -143,7 +144,7 @@ public class RobotContainer {
     Trigger joystickNine = joystick.button(9);
     joystickNine.whileTrue(new SequentialCommandGroup(
       // new SetArmPositionCommand(arm, "FloorPickupPrep"), // getting the arm into position
-      new TurnToPieceCommand(driveTrain), // turning to the expected angle of the game piece
+      //new TurnToPieceCommand(driveTrain), // turning to the expected angle of the game piece
       new LockOnPieceCommand(driveTrain, mandible), // doing the final correction using the limelight google coral pipeline
       new ArmConfirmPositionCommand(arm, "Floor"), // moving the arm into pickup position
       new DriveUntilOnPieceCommand(driveTrain, mandible),
@@ -185,11 +186,18 @@ public class RobotContainer {
         command = eventMap.get("Place Cube");
         break;
       case "Place & Charge":
+        // command = new SequentialCommandGroup(
+        //   eventMap.get("Place Cube"),
+        //   new ArmConfirmPositionCommand(arm, "FullyRetracted"),
+        //   new ConsistentChargeStationAuto(driveTrain, arm, false),
+        //   new SetArmPositionCommand(arm, "Optimized"),
+        //   new WaitCommand(0.75),
+        //   new ConsistentChargeStationAuto(driveTrain, arm, true),
+        //   new SetArmPositionCommand(arm, "Substation")
+        // );
         command = new SequentialCommandGroup(
           eventMap.get("Place Cube"),
-          new ConsistentChargeStationAuto(driveTrain, arm, false),
-          new WaitCommand(0.25),
-          new ConsistentChargeStationAuto(driveTrain, arm, true)
+          new FastChargeStationAutoCommand(driveTrain, arm)
         );
         break;
       default:
@@ -227,12 +235,12 @@ public class RobotContainer {
     eventMap.put("ArmOptimized", new SetArmPositionCommand(arm, "Optimized"));
     eventMap.put("ForwardCharge", new SequentialCommandGroup(
       new ConsistentChargeStationAuto(driveTrain, arm, false),
-      new WaitCommand(0.25),
+      new WaitCommand(0.75),
       new ConsistentChargeStationAuto(driveTrain, arm, true)
     ));
     eventMap.put("ReverseCharge", new SequentialCommandGroup(
       new ConsistentChargeStationAuto(driveTrain, arm, false, true),
-      new WaitCommand(0.25),
+      new WaitCommand(0.75),
       new ConsistentChargeStationAuto(driveTrain, arm, true, true)
     ));
   }

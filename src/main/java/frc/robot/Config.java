@@ -89,9 +89,9 @@ public class Config {
         public static class AutoPiecePickup {
             public static Constraints turnControllerConstraints = new Constraints(TeleoperatedConstants.maxAngularVelocity, TeleoperatedConstants.maxAngularVelocity * 2); // these values are definitely wrong for vision lmao
             public static double turnCommandP = 8;
-            public static double turnCommandI = 3.5;
+            public static double turnCommandI = 5.5;
             public static double turnCommandD = 0.25;
-            public static double turnCommandAngleTolerance = Math.toRadians(1.5); // 0.375, keep increasing this value until we see a % success decrease
+            public static double turnCommandAngleTolerance = Math.toRadians(3); // 0.375, keep increasing this value until we see a % success decrease
             public static double turnCommandVelocityTolerance = turnCommandAngleTolerance / 2;
             public static double piecePickupVelocity = 2; // meters/second
             public static double gamePieceXValue = 7.11835;
@@ -132,12 +132,15 @@ public class Config {
         public static boolean useLLForPoseEstimation = true;
         public static String photonCameraName = "photoncameraone";
         public static Transform3d cameraTransformation = new Transform3d(new Translation3d(-0.36195, 0.0, -0.5969), new Rotation3d());
-        public static double chargeInitialSpeed = 2.25;
-        public static double chargeFinalSpeed = 0.5;
-        public static double chargeDAngleThreshold = -17.5;
+        public static double chargeInitialSpeed = 3.25;
+        public static double chargeFinalSpeed = 0.375;
+        public static double chargeDAngleThreshold = -25;
         public static PathConstraints onTheFlyConstraints = new PathConstraints(1.5, 2);
         public static PIDConstants translationConstants = new PIDConstants(translationKP, translationKI, translationKD);
         public static PIDConstants rotationConstants = new PIDConstants(rotationKP, rotationKI, rotationKD);
+        public static double turnTokP = 2.0;
+        public static double turnTokI = 0.0;
+        public static double turnTokD = 0.0;
     }
     public static class MandibleConstants {
         public static int forwardChannel = 5;

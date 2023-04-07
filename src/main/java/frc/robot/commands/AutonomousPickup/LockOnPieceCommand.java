@@ -67,7 +67,7 @@ public class LockOnPieceCommand extends CommandBase {
 
     @Override
     public boolean isFinished() {
-        return false; //angleController.atGoal() || Config.DEBUGGING.bypassAutoChecks;
+        return angleController.atGoal() || Config.DEBUGGING.bypassAutoChecks;
     }
 
     

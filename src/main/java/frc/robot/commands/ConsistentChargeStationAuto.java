@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Drive.DriveTrain;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import frc.robot.Config;
 
@@ -15,10 +16,12 @@ public class ConsistentChargeStationAuto extends CommandBase {
     private ProfiledPIDController angleController;
     private double targetVelocity;
     private String targetArmPosition;
+    private Timer timer;
 
     public ConsistentChargeStationAuto(DriveTrain kDriveTrain, Arm kArm, boolean secondStage, boolean inverted) {
         driveTrain = kDriveTrain;
         arm = kArm;
+        timer = new Timer();
         addRequirements(driveTrain, arm);
         angleController = new ProfiledPIDController(Config.DriveConstants.turnCommandP, Config.DriveConstants.turnCommandI, Config.DriveConstants.turnCommandD, Config.DriveConstants.turnControllerConstraints);
         angleController.setTolerance(Config.DriveConstants.turnCommandAngleTolerance, Config.DriveConstants.turnCommandVelocityTolerance); // +/- 0.5 degrees (yes value is converted to radians)
@@ -43,6 +46,7 @@ public class ConsistentChargeStationAuto extends CommandBase {
     public ConsistentChargeStationAuto(DriveTrain kDriveTrain, Arm kArm, boolean secondStage) {
         driveTrain = kDriveTrain;
         arm = kArm;
+        timer = new Timer();
         addRequirements(driveTrain, arm);
         angleController = new ProfiledPIDController(Config.DriveConstants.turnCommandP, Config.DriveConstants.turnCommandI, Config.DriveConstants.turnCommandD, Config.DriveConstants.turnControllerConstraints);
         angleController.setTolerance(Config.DriveConstants.turnCommandAngleTolerance, Config.DriveConstants.turnCommandVelocityTolerance); // +/- 0.5 degrees (yes value is converted to radians)
@@ -60,20 +64,25 @@ public class ConsistentChargeStationAuto extends CommandBase {
     }
 
     @Override
+    public void initialize() {
+        timer.restart();
+    }
+    @Override
     public void execute() {
         double deltaTilt = driveTrain.getDeltaTilt();
-        if (deltaTilt < Config.AutonomousConstants.chargeDAngleThreshold) {
+        if (deltaTilt < Config.AutonomousConstants.chargeDAngleThreshold && timer.hasElapsed(1)) {
             finished = true;
         }
         else {
-            driveTrain.setChassisSpeeds(targetVelocity, 0.0, angleController.calculate(driveTrain.getEstimatedPose().getRotation().getRadians(), targetState), true);
+            driveTrain.setChassisSpeeds(targetVelocity, 0.0, 0.0, true); // angleController.calculate(driveTrain.getEstimatedPose().getRotation().getRadians()
         }
     }
 
     @Override
     public void end(boolean interrupted) {
         driveTrain.goXMode();
-        arm.setPosition(targetArmPosition);
+        timer.stop();
+        //arm.setPosition(targetArmPosition);
     }
 
     @Override

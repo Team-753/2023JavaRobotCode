@@ -10,6 +10,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import frc.robot.Config;
@@ -70,6 +71,7 @@ public class DriveTrain extends SubsystemBase {
     private PhotonPoseEstimator photonPoseEstimator;
     private double[] ppSpeeds = {0, 0, 0};
     private SendableChooser<Boolean> useAutoPoseReset = new SendableChooser<>();
+    //private double[] thetaROC = {0.0, 0.0, 0.0};
 
     public DriveTrain() {
         SmartDashboard.putBoolean("isRedAlliance", false);
@@ -240,6 +242,10 @@ public class DriveTrain extends SubsystemBase {
 
     public double getTilt() {
         return currentTilt;
+    }
+
+    public Command getXModeCommand() {
+        return new RunCommand(() -> goXMode(), this);
     }
 
 

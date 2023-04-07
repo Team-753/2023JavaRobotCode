@@ -113,14 +113,21 @@
               1
             ],
             "content": {
-              "_type": "Text View",
+              "_type": "Graph",
               "_source0": "network_table:///SmartDashboard/Delta Tilt",
               "_title": "Delta Tilt",
               "_glyph": 148,
-              "_showGlyph": false
+              "_showGlyph": false,
+              "Graph/Visible time": 30.0,
+              "Graph/X-axis auto scrolling": true,
+              "Y-axis/Automatic bounds": true,
+              "Y-axis/Upper bound": 1.0,
+              "Y-axis/Lower bound": -1.0,
+              "Y-axis/Unit": "ul",
+              "Visible data/SmartDashboard/Delta Tilt": true
             }
           },
-          "1,1": {
+          "2,2": {
             "size": [
               1,
               1
@@ -209,32 +216,6 @@
               "_type": "ComboBox Chooser",
               "_source0": "network_table:///SmartDashboard/Auto Piece Chooser",
               "_title": "Auto Piece Chooser",
-              "_glyph": 148,
-              "_showGlyph": false
-            }
-          },
-          "0,2": {
-            "size": [
-              2,
-              1
-            ],
-            "content": {
-              "_type": "Text View",
-              "_source0": "network_table:///SmartDashboard/Target Pose",
-              "_title": "Target Pose",
-              "_glyph": 148,
-              "_showGlyph": false
-            }
-          },
-          "2,2": {
-            "size": [
-              1,
-              1
-            ],
-            "content": {
-              "_type": "Text View",
-              "_source0": "network_table:///SmartDashboard/Tag Distance",
-              "_title": "Tag Distance",
               "_glyph": 148,
               "_showGlyph": false
             }
